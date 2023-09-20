@@ -20,6 +20,7 @@ from TraditionalCV import TraditionalCV
 from CombineModel import CombineModel
 from CalculateEdge import CalculateEdgeLength
 from secondMethod import secondMethod
+import pyodbc
 
 class PandasModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
@@ -223,7 +224,7 @@ class Ui_MainWindow(object):
     def imgResult_comparison_method(self):
         self.scene1 = QtWidgets.QGraphicsScene()
         self.graphicsView.setScene(self.scene1)
-        img, self.error_dis_and_point = self.cam_process()
+        img, self.error_dis_and_point, _, _ = self.cam_process()
         imgshow = np.array(img)
         height, width, channel = imgshow.shape
         bytes_per_line = channel * width    
@@ -281,17 +282,18 @@ class Ui_MainWindow(object):
             dfAQL['OrdNum'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
             return dfAQL
+    ### HERE IS COMPARISON METHOD
+    # def display_image_measurement(self):
+    #     self.imgResult_comparison_method()
+    #     self.Result_comparison_method()
+    #     self.Final_result_comparison()
 
-    def display_image_measurement(self):
-        self.imgResult_comparison_method()
-        self.Result_comparison_method()
-        self.Final_result_comparison()
-
+    finalLengthList =[]
     def imgResult_dimension_method(self):
         self.scene1 = QtWidgets.QGraphicsScene()
         self.graphicsView.setScene(self.scene1)
-        img, self.error_dis_and_point = self.cam_process()
-        imgshow = np.array(img)
+        _, _, imgDimension, self.finalLengthList = self.cam_process()
+        imgshow = imgDimension
         height, width, channel = imgshow.shape
         bytes_per_line = channel * width    
         image = QImage(imgshow.data, width, height, bytes_per_line, QImage.Format_RGB888)
@@ -301,7 +303,53 @@ class Ui_MainWindow(object):
         self.scene1.clear()
         self.scene1.addPixmap(pixmap)
 
+    def Result_dimension_method(self):
+        text_insert = self.get_specs_info()
+        server = 'quangsog-Inspiron-5570'
+        database = 'HBI_app'
+        username = 'sa'
+        password = '123456Qa'
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        conn = pyodbc.connect(connection_string)
+
+        df = pd.read_sql(f"SELECT Dimension_Name, Dimension_Value FROM FirstMethod WHERE Garment_Style = '{text_insert[0]}' AND Pattern_Code = '{text_insert[1]}' AND Piece_Name = '{text_insert[2]}' AND Size = {text_insert[3]}", conn)
+        df['Measurement_Value'] = self.finalLengthList
+
+        headers = list(df.head(0))
+        model = PandasModel(df)
+        self.tableView.setModel(model)
+        conn.close()
     
+    def Final_result_dimension(self):
+        dfAQL = pd.DataFrame()
+        if self.run == 0:
+            self.label_8.setText("Checking: " + str(self.AQL_count))
+
+            self.OrdNum.append(self.AQL_count)       
+            text = self.get_specs_info()
+            self.ResultAQL.append('Rejected')
+
+            dfAQL['OrdNum'] = self.OrdNum
+            dfAQL['Result'] = self.ResultAQL
+
+            headers = list(dfAQL.head(0))
+            modelAQL = PandasModel(dfAQL)
+            self.tableView_2.setModel(modelAQL)
+            self.AQL_count += 1
+
+            if text[1] == "BB":
+                self.label_7.setText("Tolerance: 1/4")
+            else:
+                self.label_7.setText("Tolerance: 1/8")
+        else:
+            dfAQL['OrdNum'] = self.OrdNum
+            dfAQL['Result'] = self.ResultAQL
+            return dfAQL
+    ### HERE IS DIMENSION METHOD
+    def display_image_measurement(self):
+        self.imgResult_dimension_method()
+        self.Result_dimension_method()
+        self.Final_result_dimension()
 
     def changeDimensionMeasurement(self):
         self.label_5.setText("Dimension Measurement")
@@ -394,10 +442,12 @@ class Ui_MainWindow(object):
 
         Combine = CombineModel(yolo_corners, cv_corners, TradCV.threshold, mask)
         Combine.process(num_corners = 6, mode = 'A')
+        imgDimension = Combine.imageOnlyCorners
         roi_cut, rotation_matrix, transposed_matrix, center_point_cut = Combine.cutting_image_2ndMethod()
 
         Edge = CalculateEdgeLength(mask, Combine.combineCorners, TradCV.threshold)
         Edge.process()
+        finalLengthList = Edge.finalLengthList
         edges = Edge.edgePointsList
 
         cnts_cor_newlist = []
@@ -408,11 +458,11 @@ class Ui_MainWindow(object):
                 transposed_pixel = [int(rotated_pixel[0] - transposed_matrix[0]), int(rotated_pixel[1] - transposed_matrix[1])]
                 edge_cor_newlist.append(transposed_pixel)
             cnts_cor_newlist.append([edge_cor_newlist, edge[1]])
-        return cnts_cor_newlist, center_point_cut
+        return cnts_cor_newlist, center_point_cut, imgDimension, finalLengthList
 
     def cam_process(self):
         roi_hardP, white_tor_cor_newlist, center_point_hardP, edges_hardP = self.hardpattern_points_process()
-        cnts_cor_newlist, center_point_cut = self.cutpart_points_process()
+        cnts_cor_newlist, center_point_cut, imgDimension, finalLengthList = self.cutpart_points_process()
         for edge in cnts_cor_newlist:
             for cor in edge[0]:
                 cor[0] = cor[0] + center_point_hardP[0] - center_point_cut[0]
@@ -443,7 +493,7 @@ class Ui_MainWindow(object):
                 error_dis_and_point.append([sort_error_edge[0], i])
             else:
                 error_dis_and_point.append([[None, None], i])
-        return roi_hardP, error_dis_and_point
+        return roi_hardP, error_dis_and_point, imgDimension, finalLengthList
 
     ### End function
     countPass = 0
