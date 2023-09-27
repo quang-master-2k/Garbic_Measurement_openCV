@@ -1,4 +1,4 @@
-CREATE TABLE FirstMethod (
+CREATE TABLE DimensionMethod (
     Garment_Style VARCHAR(255),
     Pattern_Code VARCHAR(255),
     Piece_Name VARCHAR(255),
@@ -7,4 +7,4 @@ CREATE TABLE FirstMethod (
     Dimension_Value FLOAT
 )
 
-SELECT * FROM FirstMethod
+SELECT * FROM DimensionMethod

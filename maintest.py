@@ -21,6 +21,7 @@ from CombineModel import CombineModel
 from CalculateEdge import CalculateEdgeLength
 from secondMethod import secondMethod
 import pyodbc
+from sqlalchemy import create_engine
 
 class PandasModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
@@ -220,20 +221,38 @@ class Ui_MainWindow(object):
 
 
     ### Visualization function
+    imgComparison = None
     error_dis_and_point = []
-    def imgResult_comparison_method(self):
-        self.scene1 = QtWidgets.QGraphicsScene()
-        self.graphicsView.setScene(self.scene1)
-        img, self.error_dis_and_point, _, _ = self.cam_process()
-        imgshow = np.array(img)
-        height, width, channel = imgshow.shape
-        bytes_per_line = channel * width    
-        image = QImage(imgshow.data, width, height, bytes_per_line, QImage.Format_RGB888)
+    imgDimension = None
+    finalLengthList = []
+    def imgprocess(self): 
+        self.imgComparison, self.error_dis_and_point, self.imgDimension, self.finalLengthList = self.cam_process()
 
-        pixmap = QPixmap.fromImage(image)
-        pixmap = pixmap.scaled(720, 480)
-        self.scene1.clear()
-        self.scene1.addPixmap(pixmap)
+    def imgResult_show(self):
+        if self.label_5.text() == 'Dimension Measurement':
+            self.scene1 = QtWidgets.QGraphicsScene()
+            self.graphicsView.setScene(self.scene1)
+
+            height, width, channel = self.imgDimension.shape
+            bytes_per_line = channel * width    
+            imageDi = QImage(self.imgDimension.data.tobytes(), width, height, bytes_per_line, QImage.Format_RGB888)
+
+            pixmap = QPixmap.fromImage(imageDi)
+            pixmap = pixmap.scaled(720, 480)
+            self.scene1.clear()
+            self.scene1.addPixmap(pixmap)
+        if self.label_5.text() == 'Comparison Measurement':
+            self.scene1 = QtWidgets.QGraphicsScene()
+            self.graphicsView.setScene(self.scene1)
+
+            height, width, channel = self.imgComparison.shape
+            bytes_per_line = channel * width    
+            image = QImage(self.imgComparison.data.tobytes(), width, height, bytes_per_line, QImage.Format_RGB888)
+
+            pixmap = QPixmap.fromImage(image)
+            pixmap = pixmap.scaled(720, 480)
+            self.scene1.clear()
+            self.scene1.addPixmap(pixmap)
 
     def Result_comparison_method(self):
         error_list = self.error_dis_and_point
@@ -283,25 +302,15 @@ class Ui_MainWindow(object):
             dfAQL['Result'] = self.ResultAQL
             return dfAQL
     ### HERE IS COMPARISON METHOD
-    # def display_image_measurement(self):
-    #     self.imgResult_comparison_method()
-    #     self.Result_comparison_method()
-    #     self.Final_result_comparison()
-
-    finalLengthList =[]
-    def imgResult_dimension_method(self):
-        self.scene1 = QtWidgets.QGraphicsScene()
-        self.graphicsView.setScene(self.scene1)
-        _, _, imgDimension, self.finalLengthList = self.cam_process()
-        imgshow = imgDimension
-        height, width, channel = imgshow.shape
-        bytes_per_line = channel * width    
-        image = QImage(imgshow.data, width, height, bytes_per_line, QImage.Format_RGB888)
-
-        pixmap = QPixmap.fromImage(image)
-        pixmap = pixmap.scaled(720, 480)
-        self.scene1.clear()
-        self.scene1.addPixmap(pixmap)
+    def display_image_measurement(self):
+        self.imgprocess()
+        self.imgResult_show()
+        if self.label_5.text() == 'Dimension Measurement':
+            self.Result_dimension_method()
+            self.Final_result_dimension()
+        elif self.label_5.text() == 'Comparison Measurement':
+            self.Result_comparison_method()
+            self.Final_result_comparison()
 
     def Result_dimension_method(self):
         text_insert = self.get_specs_info()
@@ -310,15 +319,17 @@ class Ui_MainWindow(object):
         username = 'sa'
         password = '123456Qa'
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-        conn = pyodbc.connect(connection_string)
+        engine = create_engine(f'mssql+pyodbc:///?odbc_connect={connection_string}')
 
-        df = pd.read_sql(f"SELECT Dimension_Name, Dimension_Value FROM FirstMethod WHERE Garment_Style = '{text_insert[0]}' AND Pattern_Code = '{text_insert[1]}' AND Piece_Name = '{text_insert[2]}' AND Size = {text_insert[3]}", conn)
+
+        query = f"SELECT Dimension_Name, Dimension_Value FROM FirstMethod WHERE Garment_Style = '{text_insert[0]}' AND Pattern_Code = '{text_insert[1]}' AND Piece_Name = '{text_insert[2]}' AND Size = {text_insert[3]}"
+        df = pd.read_sql(query, engine)
         df['Measurement_Value'] = self.finalLengthList
 
         headers = list(df.head(0))
         model = PandasModel(df)
         self.tableView.setModel(model)
-        conn.close()
+        engine.dispose()
     
     def Final_result_dimension(self):
         dfAQL = pd.DataFrame()
@@ -345,21 +356,42 @@ class Ui_MainWindow(object):
             dfAQL['OrdNum'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
             return dfAQL
-    ### HERE IS DIMENSION METHOD
-    def display_image_measurement(self):
-        self.imgResult_dimension_method()
-        self.Result_dimension_method()
-        self.Final_result_dimension()
 
     def changeDimensionMeasurement(self):
-        self.label_5.setText("Dimension Measurement")
-        self.actionDimension.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
-        self.actionComparison.setIcon(QtGui.QIcon())  # Clear the icon from the "Second" action
+        if self.AQL_count == 1:
+            self.label_5.setText("Dimension Measurement")
+            self.actionDimension.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
+            self.actionComparison.setIcon(QtGui.QIcon())  # Clear the icon from the "Second" action
+        else:
+            self.label_5.setText("Dimension Measurement")
+            self.actionDimension.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
+            self.actionComparison.setIcon(QtGui.QIcon())  # Clear the icon from the "Second" action
+            self.imgResult_show()
+            self.Result_dimension_method()
+            self.run = 1
+            dfAQL = self.Final_result_dimension()
+            headers = list(dfAQL.head(0))
+            modelAQL = PandasModel(dfAQL)
+            self.tableView_2.setModel(modelAQL)
+            self.run = 0
 
     def changeComparisonMeasurement(self):
-        self.label_5.setText("Comparison Measurement")
-        self.actionComparison.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
-        self.actionDimension.setIcon(QtGui.QIcon())  # Clear the icon from the "Dimension" action
+        if self.AQL_count == 1:
+            self.label_5.setText("Comparison Measurement")
+            self.actionComparison.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
+            self.actionDimension.setIcon(QtGui.QIcon())  # Clear the icon from the "Dimension" action
+        else:
+            self.label_5.setText("Comparison Measurement")
+            self.actionComparison.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
+            self.actionDimension.setIcon(QtGui.QIcon())  # Clear the icon from the "Dimension" action
+            self.imgResult_show()
+            self.Result_comparison_method()
+            self.run = 1
+            dfAQL = self.Final_result_comparison()
+            headers = list(dfAQL.head(0))
+            modelAQL = PandasModel(dfAQL)
+            self.tableView_2.setModel(modelAQL)
+            self.run = 0
     
     ### Start function
     def set_start(self):
@@ -367,7 +399,6 @@ class Ui_MainWindow(object):
         self.textEdit_2.setText("")
         self.textEdit_3.setText("")
         self.textEdit_4.setText("")
-        self.changeComparisonMeasurement()
         self.tableView.setModel(None)
         self.tableView_2.setModel(None)
         self.scene = QtWidgets.QGraphicsScene()
@@ -384,6 +415,7 @@ class Ui_MainWindow(object):
         self.run = 0
         self.label_7.setText("Tolerance: 0")
         self.label_8.setText("Checking: 0")
+        self.changeComparisonMeasurement()
 
 
     ### Camera processing
