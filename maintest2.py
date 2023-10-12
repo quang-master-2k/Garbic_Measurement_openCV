@@ -21,6 +21,7 @@ from CombineModel import CombineModel
 from CalculateEdge import CalculateEdgeLength
 from secondMethod import secondMethod
 from sqlalchemy import create_engine
+import pyodbc
 
 class PandasModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
@@ -354,11 +355,6 @@ class Ui_MainWindow(object):
             modelAQL = PandasModel(dfAQL)
             self.tableView_2.setModel(modelAQL)
             self.AQL_count += 1
-
-            if text[1] == "BB":
-                self.label_7.setText("Tolerance: 1/4")
-            else:
-                self.label_7.setText("Tolerance: 1/8") 
         else:
             dfAQL['OrdNum'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
@@ -449,6 +445,19 @@ class Ui_MainWindow(object):
         cv_corners, mask = TradCV.finalCorner, TradCV.maskAccurate
 
         ### Thickness is 23. Modify it to suitable with torelance
+        text_insert = self.get_specs_info()
+        server = 'quangsog-Inspiron-5570'
+        database = 'HBI_app'
+        username = 'sa'
+        password = '123456Qa'
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        conn = pyodbc.connect(connection_string)
+        sql_thickness = "SELECT Tolerance FROM ComparisonDatabase WHERE Garment_Style = '{text_insert[0]}' AND Pattern_Code = '{text_insert[1]}' AND Piece_Name = '{text_insert[2]}'"
+        thickness = conn.execute(sql_thickness)
+        conn.commit()
+        conn.close()
+        print("Tor:" + thickness)
+
         MeasurementMethod_hardP = secondMethod(mask, TradCV.cnt, 23)
         mask_tor = MeasurementMethod_hardP.drawTorContours()
         white_tor_pixels_cor = MeasurementMethod_hardP.getTorleranceArea(mask_tor)

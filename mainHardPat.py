@@ -49,7 +49,7 @@ def hardpattern_points_process():
     return roi_hardP, white_tor_cor_newlist, center_point_hardP, edges_hardP_cor_newlist
 
 def cutpart_points_process():
-    image_path_cut = 'image_128.jpg'
+    image_path_cut = 'image_124.jpg'
     input_image_cut = cv2.imread(image_path_cut)
     Yolo = YoloModel()
     Yolo.process(input_image_cut)
@@ -115,15 +115,29 @@ for i in range(len(error_edges)):
                 distance = ((point[0] - cor[0])**2 + (point[1] - cor[1])**2)**(1/2)
                 if distance < min_dis:
                     min_dis = distance
-            sort_error_edge.append([point, min_dis])
-        sort_error_edge = sorted(sort_error_edge, key=lambda x:x[1], reverse=True)
+            sort_error_edge.append([min_dis])
+        sort_error_edge = sorted(sort_error_edge, key=lambda x:x[0], reverse=True)
         error_dis_and_point.append([sort_error_edge[0], i])
     else:
-        error_dis_and_point.append([[None, None], i])
+        error_dis_and_point.append([[None], i])
+
+for i in range(len(cnts_cor_newlist)):
+    sort_cal_edge = []
+    for point in cnts_cor_newlist[i][0]:
+        min_dis = 1000000
+        for cor in edges_hardP[i][0]:
+            distance_cal = ((point[0] - cor[0])**2 + (point[1] - cor[1])**2)**(1/2)
+            if distance_cal < min_dis:
+                min_dis = distance_cal
+        sort_cal_edge.append(min_dis)
+    sort_cal_edge = sorted(sort_cal_edge, reverse=True)
+    error_dis_and_point[i][0].append(sort_cal_edge[0])
 
 print(error_dis_and_point)
 
-cv2.imshow("roi_hardP_128.jpg", roi_hardP)
+
+
+cv2.imshow("roi_hardP_124.jpg", roi_hardP)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

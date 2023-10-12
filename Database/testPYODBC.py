@@ -20,7 +20,7 @@ df['Measurement_Value'] = [1,2,3,4,5,6,7,8]
 print(df)
 
 engine.dispose()  # Close the SQLAlchemy engine
-end_time = time.time()
+end_time = time.time()  
 
 elapsed_time = end_time - start_time
 

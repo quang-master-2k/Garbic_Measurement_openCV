@@ -284,24 +284,30 @@
      <string>Measurement</string>
     </property>
     <addaction name="actionDimension"/>
-    <addaction name="actionSecond"/>
+    <addaction name="actionComparison"/>
    </widget>
-   <widget class="QMenu" name="menuSetting">
+   <widget class="QMenu" name="menuOptions">
     <property name="title">
-     <string>Setting</string>
+     <string>Options</string>
     </property>
+    <addaction name="actionSetting"/>
    </widget>
    <addaction name="menuSecond"/>
-   <addaction name="menuSetting"/>
+   <addaction name="menuOptions"/>
   </widget>
   <action name="actionDimension">
    <property name="text">
     <string>Dimension</string>
    </property>
   </action>
-  <action name="actionSecond">
+  <action name="actionComparison">
    <property name="text">
-    <string>Second</string>
+    <string>Comparison</string>
+   </property>
+  </action>
+  <action name="actionSetting">
+   <property name="text">
+    <string>Setting</string>
    </property>
   </action>
  </widget>
