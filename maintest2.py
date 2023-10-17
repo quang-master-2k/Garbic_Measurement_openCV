@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QImage, QPixmap
 import pandas as pd
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, QTableView
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont, QPixmap
 from Yolo import YoloModel
 from TraditionalCV import TraditionalCV
 from CombineModel import CombineModel
@@ -93,16 +93,19 @@ class Ui_MainWindow(object):
         self.pushButton_2.clicked.connect(self.display_image_measurement)
 
         self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(10, 90, 722, 482))
+        self.graphicsView.setGeometry(QtCore.QRect(10, 85, 722, 482))
         self.graphicsView.setObjectName("graphicsView")
 
+        self.graphicsView_2 = QtWidgets.QGraphicsView(self.centralwidget)
+        self.graphicsView_2.setGeometry(QtCore.QRect(740, 110, 451, 301))
+        self.graphicsView_2.setObjectName("graphicsView_2")
+
         self.tableView = QtWidgets.QTableView(self.centralwidget)
-        self.tableView.setGeometry(QtCore.QRect(740, 90, 351, 481))
+        self.tableView.setGeometry(QtCore.QRect(740, 470, 451, 421))
         self.tableView.setObjectName("tableView")
 
-
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
-        self.label_5.setGeometry(QtCore.QRect(10, 10, 300, 21))
+        self.label_5.setGeometry(QtCore.QRect(10, 10, 1000, 21))
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
         font.setPointSize(15)
@@ -120,11 +123,11 @@ class Ui_MainWindow(object):
         self.pushButton_3.clicked.connect(self.end_measurement)
 
         self.tableView_2 = QtWidgets.QTableView(self.centralwidget)
-        self.tableView_2.setGeometry(QtCore.QRect(10, 580, 291, 281))
+        self.tableView_2.setGeometry(QtCore.QRect(10, 600, 291, 281))
         self.tableView_2.setObjectName("tableView_2")
 
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
-        self.label_6.setGeometry(QtCore.QRect(590, 600, 191, 21))
+        self.label_6.setGeometry(QtCore.QRect(320, 580, 191, 21))
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
         font.setPointSize(15)
@@ -132,20 +135,75 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_6.setFont(font)
         self.label_6.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label_6.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_6.setAlignment(QtCore.Qt.AlignLeft)
         self.label_6.setObjectName("label_6")
 
         self.label_7 = QtWidgets.QLabel(self.centralwidget)
-        self.label_7.setGeometry(QtCore.QRect(1110, 90, 200, 17))
+        self.label_7.setGeometry(QtCore.QRect(1210, 470, 200, 17))
         self.label_7.setObjectName("label_7")
 
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
-        self.label_8.setGeometry(QtCore.QRect(1110, 120, 200, 17))
+        self.label_8.setGeometry(QtCore.QRect(1210, 500, 200, 17))
         self.label_8.setObjectName("label_8")
+        
+        self.label_9 = QtWidgets.QLabel(self.centralwidget)
+        self.label_9.setGeometry(QtCore.QRect(320, 620, 200, 17))
+        self.label_9.setObjectName("label_9")
 
-        self.pushButton_4 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_4.setGeometry(QtCore.QRect(650, 830, 89, 25))
-        self.pushButton_4.setObjectName("pushButton_4")
+        self.label_10 = QtWidgets.QLabel(self.centralwidget)
+        self.label_10.setGeometry(QtCore.QRect(320, 650, 200, 17))
+        self.label_10.setObjectName("label_10")
+
+        self.label_11 = QtWidgets.QLabel(self.centralwidget)
+        self.label_11.setGeometry(QtCore.QRect(320, 680, 200, 21))
+        self.label_11.setFont(font)
+        self.label_11.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_11.setAlignment(QtCore.Qt.AlignLeft)
+        self.label_11.setObjectName("label_11")
+
+        self.label_12 = QtWidgets.QLabel(self.centralwidget)
+        self.label_12.setGeometry(QtCore.QRect(445, 680, 200, 21))
+        self.label_12.setObjectName("label_12")
+
+        self.label_13 = QtWidgets.QLabel(self.centralwidget)
+        self.label_13.setGeometry(QtCore.QRect(740, 85, 451, 21))
+        fontDes = QtGui.QFont()
+        fontDes.setFamily("Ubuntu")
+        fontDes.setPointSize(13)
+        fontDes.setBold(True)
+        fontDes.setWeight(75)
+        self.label_13.setFont(fontDes)
+        self.label_13.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_13.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_13.setObjectName("label_13")
+
+        self.label_14 = QtWidgets.QLabel(self.centralwidget)
+        self.label_14.setGeometry(QtCore.QRect(740, 440, 451, 21))
+        fontDes = QtGui.QFont()
+        fontDes.setFamily("Ubuntu")
+        fontDes.setPointSize(13)
+        fontDes.setBold(True)
+        fontDes.setWeight(75)
+        self.label_14.setFont(fontDes)
+        self.label_14.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_14.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_14.setObjectName("label_14")
+
+        self.label_15 = QtWidgets.QLabel(self.centralwidget)
+        self.label_15.setGeometry(QtCore.QRect(10, 580, 291, 21))
+        fontDes = QtGui.QFont()
+        fontDes.setFamily("Ubuntu")
+        fontDes.setPointSize(13)
+        fontDes.setBold(True)
+        fontDes.setWeight(75)
+        self.label_15.setFont(fontDes)
+        self.label_15.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_15.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_15.setObjectName("label_15")
+
+        # self.pushButton_4 = QtWidgets.QPushButton(self.centralwidget)
+        # self.pushButton_4.setGeometry(QtCore.QRect(650, 830, 89, 25))
+        # self.pushButton_4.setObjectName("pushButton_4")
 
 
         MainWindow.setCentralWidget(self.centralwidget)
@@ -195,7 +253,14 @@ class Ui_MainWindow(object):
         self.label_6.setText(_translate("MainWindow", "Final result report"))
         self.label_7.setText(_translate("MainWindow", "Torelance: 0"))
         self.label_8.setText(_translate("MainWindow", "Checking: 0"))
-        self.pushButton_4.setText(_translate("MainWindow", "Export"))
+        self.label_9.setText(_translate("MainWindow", "OK: 0/0 - 0%"))
+        self.label_10.setText(_translate("MainWindow", "NG: 0/0 - 0%"))
+        self.label_11.setText(_translate("MainWindow", "Final Result:"))
+        self.label_12.setText(_translate("MainWindow", ""))
+        self.label_13.setText(_translate("MainWindow", "Egde Description"))
+        self.label_14.setText(_translate("MainWindow", "Measured Table"))
+        self.label_15.setText(_translate("MainWindow", "Checking Result Table"))
+        # self.pushButton_4.setText(_translate("MainWindow", "Export"))
         self.menuMeasurement.setTitle(_translate("MainWindow", "Measurement"))
         self.menuOptions.setTitle(_translate("MainWindow", "Options"))
         self.actionDimension.setText(_translate("MainWindow", "Dimension"))
@@ -243,7 +308,7 @@ class Ui_MainWindow(object):
         self.imgComparison, self.error_dis_and_point, self.imgDimension, self.finalLengthList = self.cam_process()
 
     def imgResult_show(self):
-        if self.label_5.text() == 'Dimension Measurement':
+        if self.label_5.text() == 'Dimension Method':
             self.scene1 = QtWidgets.QGraphicsScene()
             self.graphicsView.setScene(self.scene1)
 
@@ -254,8 +319,8 @@ class Ui_MainWindow(object):
             pixmap = QPixmap.fromImage(imageDi)
             pixmap = pixmap.scaled(720, 480)
             self.scene1.clear()
-            self.scene1.addPixmap(pixmap)
-        elif self.label_5.text() == 'Comparison Measurement':
+            self.scene1.addPixmap(pixmap)   
+        elif self.label_5.text() == 'Comparison Method':
             self.scene1 = QtWidgets.QGraphicsScene()
             self.graphicsView.setScene(self.scene1)
 
@@ -282,10 +347,20 @@ class Ui_MainWindow(object):
         dfMea['Edge'] = error_edges
         dfMea['Error_Dis'] = error_dis
         dfMea['Max_Dis'] = max_dis
+        dfMea = dfMea.round(3)
 
         headers_Mea = list(dfMea.head(0))
         modelMea = PandasModel(dfMea)
         self.tableView.setModel(modelMea)
+
+        self.scene3 = QtWidgets.QGraphicsScene()
+        pixmap = QPixmap("compa.png")
+        pixmap = pixmap.scaled(450, 300)
+        self.scene3.clear()
+        self.scene3.addPixmap(pixmap)
+        self.graphicsView_2.setScene(self.scene3)
+
+        return dfMea
 
     AQL_count = 1
     OrdNum = []
@@ -299,9 +374,16 @@ class Ui_MainWindow(object):
 
             self.OrdNum.append(self.AQL_count)       
             text = self.get_specs_info()
-            self.ResultAQL.append('Rejected')
+            dfMea = self.Result_comparison_method()
+            for i in range(len(dfMea['Error_Dis'])):
+                if dfMea["Error_Dis"][i] > 0:
+                    self.ResultAQL.append('NG')
+                    break
+                else:
+                    if i == len(dfMea["Error_Dis"]):
+                        self.ResultAQL.append('OK')
 
-            dfAQL['OrdNum'] = self.OrdNum
+            dfAQL['Cut-part No'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
 
             headers = list(dfAQL.head(0))
@@ -314,7 +396,7 @@ class Ui_MainWindow(object):
             else:
                 self.label_7.setText("Tolerance: 1/8")
         else:
-            dfAQL['OrdNum'] = self.OrdNum
+            dfAQL['Cut-part No'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
             return dfAQL
         
@@ -332,12 +414,21 @@ class Ui_MainWindow(object):
 
         query = f"SELECT Dimension_Name, Dimension_Value FROM DimensionDatabase WHERE Garment_Style = '{text_insert[0]}' AND Pattern_Code = '{text_insert[1]}' AND Piece_Name = '{text_insert[2]}' AND Size = {text_insert[3]}"
         df = pd.read_sql(query, engine)
-        df['Measurement_Value'] = self.finalLengthList
+        new_column_names = {'Dimension_Name': 'Name', 'Dimension_Value': 'Specs LL'}
+        df.rename(columns=new_column_names, inplace=True)
+        df['Specs UL'] = df["Specs LL"] + 1/8
+        df["Specs LL"] = df['Specs LL'] - 1/8
+        listLength = self.finalLengthList
+        df["Dimension"] = [listLength[6], listLength[0], listLength[1], listLength[2], listLength[3], listLength[4], listLength[5], listLength[7]]
+        df["Dimension"] = df["Dimension"] / (35*2.54)
+        df = df.round(3)
 
         headers = list(df.head(0))
         model = PandasModel(df)
         self.tableView.setModel(model)
         engine.dispose()
+
+        return df
     
     def Final_result_dimension(self):
         dfAQL = pd.DataFrame()
@@ -345,10 +436,17 @@ class Ui_MainWindow(object):
             self.label_8.setText("Checking: " + str(self.AQL_count))
 
             self.OrdNum.append(self.AQL_count)       
-            text = self.get_specs_info()
-            self.ResultAQL.append('Rejected')
+            df = self.Result_dimension_method()
+            for i in range(len(df["Dimension"])):
+                if df["Dimension"][i] > df["Specs UL"][i] or df["Dimension"][i] < df["Specs LL"][i]:
+                    self.ResultAQL.append('NG')
+                    break
+                else:
+                    if i == len(df["Dimension"]):
+                        self.ResultAQL.append('OK')
 
-            dfAQL['OrdNum'] = self.OrdNum
+
+            dfAQL['Cut-part No'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
 
             headers = list(dfAQL.head(0))
@@ -356,7 +454,7 @@ class Ui_MainWindow(object):
             self.tableView_2.setModel(modelAQL)
             self.AQL_count += 1
         else:
-            dfAQL['OrdNum'] = self.OrdNum
+            dfAQL['Cut-part No'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
             return dfAQL
 
@@ -364,20 +462,20 @@ class Ui_MainWindow(object):
     def display_image_measurement(self):
         self.imgprocess()
         self.imgResult_show()
-        if self.label_5.text() == "Dimension Measurement":
+        if self.label_5.text() == "Dimension Method":
             self.Result_dimension_method()
             self.Final_result_dimension()
-        elif self.label_5.text() == "Comparison Measurement":
-            self.Result_comparison_method()
+        elif self.label_5.text() == "Comparison Method":
+            # self.Result_comparison_method()
             self.Final_result_comparison()
 
     def changeDimensionMeasurement(self):
         if self.AQL_count == 1:
-            self.label_5.setText("Dimension Measurement")
+            self.label_5.setText("Dimension Method")
             self.actionDimension.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
             self.actionComparison.setIcon(QtGui.QIcon())  # Clear the icon from the "Measurement" action
         else:
-            self.label_5.setText("Dimension Measurement")
+            self.label_5.setText("Dimension Method")
             self.actionDimension.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
             self.actionComparison.setIcon(QtGui.QIcon())  # Clear the icon from the "Measurement" action
             self.imgResult_show()
@@ -391,11 +489,11 @@ class Ui_MainWindow(object):
 
     def changeComparisonMeasurement(self):
         if self.AQL_count == 1:
-            self.label_5.setText("Comparison Measurement")
+            self.label_5.setText("Comparison Method")
             self.actionComparison.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
             self.actionDimension.setIcon(QtGui.QIcon())  # Clear the icon from the "Dimension" action
         else:
-            self.label_5.setText("Comparison Measurement")  
+            self.label_5.setText("Comparison Method")  
             self.actionComparison.setIcon(QtGui.QIcon("mark.png"))  # Replace with the path to your black mark icon
             self.actionDimension.setIcon(QtGui.QIcon())  # Clear the icon from the "Dimension" action
             self.imgResult_show()
@@ -426,10 +524,13 @@ class Ui_MainWindow(object):
         self.pushButton.setEnabled(False)
         self.pushButton_2.setEnabled(True)
         self.pushButton_3.setEnabled(True)
-        self.menuMeasurement.setEnabled(False)
         self.run = 0
         self.label_7.setText("Tolerance: 0")
         self.label_8.setText("Checking: 0")
+        self.label_9.setText("Accepted: 0/0 - 0%")
+        self.label_10.setText("Not Accepted: 0/0 - 0%")
+        self.label_11.setText("Final Result: ")
+        self.label_12.setText("")
 
 
     ### Camera processing
@@ -452,11 +553,12 @@ class Ui_MainWindow(object):
         password = '123456Qa'
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
         conn = pyodbc.connect(connection_string)
-        sql_thickness = "SELECT Tolerance FROM ComparisonDatabase WHERE Garment_Style = '{text_insert[0]}' AND Pattern_Code = '{text_insert[1]}' AND Piece_Name = '{text_insert[2]}'"
-        thickness = conn.execute(sql_thickness)
+        sql_thickness = "SELECT Tolerance FROM ComparisonDatabase WHERE Garment_Style = ? AND Pattern_Code = ? AND Piece_Name = ?"
+        text_query_thickness = [text_insert[0], text_insert[1], text_insert[2]]
+        tolerance = conn.execute(sql_thickness, text_query_thickness).fetchone()
         conn.commit()
         conn.close()
-        print("Tor:" + thickness)
+        print(tolerance[0])
 
         MeasurementMethod_hardP = secondMethod(mask, TradCV.cnt, 23)
         mask_tor = MeasurementMethod_hardP.drawTorContours()
@@ -488,7 +590,7 @@ class Ui_MainWindow(object):
 
     def cutpart_points_process(self):
         ### Modify to frame from camera
-        image_path_cut = 'image_2.jpg'
+        image_path_cut = 'image_11.jpg'
         input_image_cut = cv2.imread(image_path_cut)
 
         Yolo = YoloModel()
@@ -501,7 +603,7 @@ class Ui_MainWindow(object):
 
         Combine = CombineModel(yolo_corners, cv_corners, TradCV.threshold, mask)
         Combine.process(num_corners = 6, mode = 'A')
-        imgDimension = Combine.imageOnlyCorners
+        imgDimension = Combine.imageWithMode
         roi_cut, rotation_matrix, transposed_matrix, center_point_cut = Combine.cutting_image_2ndMethod()
 
         Edge = CalculateEdgeLength(mask, Combine.combineCorners, TradCV.threshold)
@@ -517,7 +619,7 @@ class Ui_MainWindow(object):
                 transposed_pixel = [int(rotated_pixel[0] - transposed_matrix[0]), int(rotated_pixel[1] - transposed_matrix[1])]
                 edge_cor_newlist.append(transposed_pixel)
             cnts_cor_newlist.append([edge_cor_newlist, edge[1]])
-        return cnts_cor_newlist, center_point_cut, roi_cut, finalLengthList
+        return cnts_cor_newlist, center_point_cut, imgDimension, finalLengthList
 
     def cam_process(self):
         roi_hardP, white_tor_cor_newlist, center_point_hardP, edges_hardP = self.hardpattern_points_process()
@@ -531,9 +633,9 @@ class Ui_MainWindow(object):
             error_points = []
             for j in i[0]:
                 if j in white_tor_cor_newlist:
-                    cv2.circle(roi_hardP, j, 1, (0, 0, 255), -1)
+                    cv2.circle(roi_hardP, j, 2, (50, 100, 255), -1)
                 else:
-                    cv2.circle(roi_hardP, j, 1, (255, 0, 0), -1)
+                    cv2.circle(roi_hardP, j, 2, (255, 0, 0), -1)
                     error_points.append(j)
             error_edges.append([error_points, i[1]])
 
@@ -568,22 +670,44 @@ class Ui_MainWindow(object):
         return roi_hardP, error_dis_and_point, imgDimension, finalLengthList
 
     ### End function
-    countPass = 0
+    countAccepted = 0
     def end_measurement(self):
         self.cap.release()
-        self.pushButton.setEnabled(False)
+        self.pushButton.setEnabled(True)
         self.pushButton_2.setEnabled(False)
         self.pushButton_3.setEnabled(False)
         
         self.run = 1 
         dfEnd = self.Final_result_dimension()
         for i in range(len(dfEnd['Result'])):
-            if dfEnd['Result'][i] == 'Accepted':
-                self.countPass += 1
+            if dfEnd['Result'][i] == 'OK':
+                self.countAccepted += 1
 
-        P_pass = self.countPass / (self.AQL_count-1)
-        self.label_7.setText("Pass: " + str(P_pass*100) + '%')
-        self.label_8.setText("Reject: " + str((1-P_pass)*100) + '%')
+        P_pass = self.countAccepted / (self.AQL_count-1)
+        self.label_9.setText('OK: ' + str(self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str(P_pass*100) + '%')
+        self.label_10.setText('NG: ' + str(self.AQL_count- 1 - self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str((1-P_pass)*100) + '%')
+        if (P_pass < 0.95):
+            fontResult = QtGui.QFont()
+            fontResult.setFamily("Ubuntu")
+            fontResult.setPointSize(15)
+            fontResult.setBold(True)
+            fontResult.setWeight(75)    
+            self.label_12.setFont(fontResult)
+            self.label_12.setLayoutDirection(QtCore.Qt.LeftToRight)
+            self.label_12.setAlignment(QtCore.Qt.AlignLeft)
+            self.label_12.setStyleSheet('color: red')
+            self.label_12.setText('Reject')
+        else:
+            fontResult = QtGui.QFont()
+            fontResult.setFamily("Ubuntu")
+            fontResult.setPointSize(15)
+            fontResult.setBold(True)
+            fontResult.setWeight(75)    
+            self.label_12.setFont(fontResult)
+            self.label_12.setLayoutDirection(QtCore.Qt.LeftToRight)
+            self.label_12.setAlignment(QtCore.Qt.AlignLeft)
+            self.label_12.setStyleSheet('color: green')
+            self.label_12.setText('Pass')
 
     
     ### Additional function
@@ -593,16 +717,16 @@ class Ui_MainWindow(object):
         if result == QtWidgets.QDialog.Accepted:
             # Handle settings here
             selected_option = dialog.get_selected_option()
-            if selected_option == "Dimension Measurement":
-                self.label_5.setText("Dimension Measurement")
+            if selected_option == "Dimension Method":
+                self.label_5.setText("Dimension Method")
                 self.menuMeasurement.setEnabled(False)
                 self.pushButton.setEnabled(True)
-            elif selected_option == "Comparison Measurement":
-                self.label_5.setText("Comparison Measurement")
+            elif selected_option == "Comparison Method":
+                self.label_5.setText("Comparison Method")
                 self.pushButton.setEnabled(True)
                 self.menuMeasurement.setEnabled(False)
-            elif selected_option == "Dimension Measurement & Comparison Measurement":
-                self.label_5.setText("Dimension Measurement & Comparison Measurement")
+            elif selected_option == "Dimension Method & Comparison Method":
+                self.label_5.setText("Dimension Method & Comparison Method")
                 self.menuMeasurement.setEnabled(True)
                 self.pushButton.setEnabled(True)
 
@@ -631,9 +755,9 @@ class SettingDialog(QtWidgets.QDialog):
         self.cancelButton = QtWidgets.QPushButton("Cancel", self)
         self.radioGroupBox = QtWidgets.QGroupBox("Options:", self)
 
-        self.dimensionRadio = QtWidgets.QRadioButton("Dimension Measurement", self)
-        self.comparisonRadio = QtWidgets.QRadioButton("Comparison Measurement", self)
-        self.dim_comp_radio = QtWidgets.QRadioButton("Dimension Measurement & Comparison Measurement", self)
+        self.dimensionRadio = QtWidgets.QRadioButton("Dimension Method", self)
+        self.comparisonRadio = QtWidgets.QRadioButton("Comparison Method", self)
+        self.dim_comp_radio = QtWidgets.QRadioButton("Dimension Method & Comparison Method", self)
 
         self.radio_layout = QtWidgets.QVBoxLayout()
         self.radio_layout.addWidget(self.dimensionRadio)
@@ -652,11 +776,11 @@ class SettingDialog(QtWidgets.QDialog):
 
     def get_selected_option(self):
         if self.dimensionRadio.isChecked():
-            return "Dimension Measurement"
+            return "Dimension Method"
         elif self.comparisonRadio.isChecked():
-            return "Comparison Measurement"
+            return "Comparison Method"
         elif self.dim_comp_radio.isChecked():
-            return "Dimension Measurement & Comparison Measurement"
+            return "Dimension Method & Comparison Method"
         return ""
 
 if __name__ == "__main__":
