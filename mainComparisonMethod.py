@@ -6,11 +6,12 @@ import cv2
 import numpy as np
 from secondMethod import secondMethod
 
+image_path_hard = 'hardpart.jpg'
+image_path_cut = 'image_124.jpg'
 
 ### HARD_PATTERN FULL CODE PROCESS
 
-def hardpattern_points_process():
-    image_path_hard = 'hardpart.jpg'
+def hardpattern_points_process(image_path_hard):
     input_image_hard = cv2.imread(image_path_hard)
     Yolo = YoloModel()
     Yolo.process(input_image_hard)
@@ -48,8 +49,7 @@ def hardpattern_points_process():
 
     return roi_hardP, white_tor_cor_newlist, center_point_hardP, edges_hardP_cor_newlist
 
-def cutpart_points_process():
-    image_path_cut = 'image_124.jpg'
+def cutpart_points_process(image_path_cut):
     input_image_cut = cv2.imread(image_path_cut)
     Yolo = YoloModel()
     Yolo.process(input_image_cut)
@@ -77,67 +77,74 @@ def cutpart_points_process():
         cnts_cor_newlist.append([edge_cor_newlist, edge[1]])
     return cnts_cor_newlist, center_point_cut
 
-def merge_cutPart_to_hardP(center_point_hardP, center_point_cut, cnt_cor_newlist):
+def merge_cutPart_to_hardP(center_point_hardP, center_point_cut, cnts_cor_newlist):
     for edge in cnts_cor_newlist:
         for cor in edge[0]:
             cor[0] = cor[0] + center_point_hardP[0] - center_point_cut[0]
             cor[1] = cor[1] + center_point_hardP[1] - center_point_cut[1] 
-    return cnt_cor_newlist
+    return cnts_cor_newlist
 
+def error_list(cnts_cor_newlist, white_tor_cor_newlist, roi_hardP, edges_hardP):
+    error_edges = []
+    for i in cnts_cor_newlist:
+        error_points = []
+        for j in i[0]:
+            if j in white_tor_cor_newlist:
+                cv2.circle(roi_hardP, j, 1, (255, 0, 0), -1)
+            else:
+                cv2.circle(roi_hardP, j, 1, (0, 0, 255), -1)
+                error_points.append(j)
+        error_edges.append([error_points, i[1]])
 
-roi_hardP, white_tor_cor_newlist, center_point_hardP, edges_hardP = hardpattern_points_process()
-cnts_cor_newlist, center_point_cut = cutpart_points_process()
-cnts_cor_newlist = merge_cutPart_to_hardP(center_point_hardP, center_point_cut, cnts_cor_newlist)
-
-for i in edges_hardP:
-    for j in i[0]:
-        cv2.circle(roi_hardP, j, 1, (0, 255, 255), -1)
-
-
-error_edges = []
-for i in cnts_cor_newlist:
-    error_points = []
-    for j in i[0]:
-        if j in white_tor_cor_newlist:
-            cv2.circle(roi_hardP, j, 1, (255, 0, 0), -1)
+    error_dis_and_point = []
+    for i in range(len(error_edges)):
+        if len(error_edges[i][0]) != 0:
+            sort_error_edge = []
+            for point in error_edges[i][0]:
+                min_dis = 1000000
+                for cor in edges_hardP[i][0]:
+                    distance = ((point[0] - cor[0])**2 + (point[1] - cor[1])**2)**(1/2)
+                    if distance < min_dis:
+                        min_dis = distance
+                sort_error_edge.append([min_dis])
+            sort_error_edge = sorted(sort_error_edge, key=lambda x:x[0], reverse=True)
+            error_dis_and_point.append([sort_error_edge[0], i])
         else:
-            cv2.circle(roi_hardP, j, 1, (0, 0, 255), -1)
-            error_points.append(j)
-    error_edges.append([error_points, i[1]])
+            error_dis_and_point.append([[None], i])
 
-error_dis_and_point = []
-for i in range(len(error_edges)):
-    if len(error_edges[i][0]) != 0:
-        sort_error_edge = []
-        for point in error_edges[i][0]:
+    for i in range(len(cnts_cor_newlist)):
+        sort_cal_edge = []
+        for point in cnts_cor_newlist[i][0]:
             min_dis = 1000000
             for cor in edges_hardP[i][0]:
-                distance = ((point[0] - cor[0])**2 + (point[1] - cor[1])**2)**(1/2)
-                if distance < min_dis:
-                    min_dis = distance
-            sort_error_edge.append([min_dis])
-        sort_error_edge = sorted(sort_error_edge, key=lambda x:x[0], reverse=True)
-        error_dis_and_point.append([sort_error_edge[0], i])
-    else:
-        error_dis_and_point.append([[None], i])
+                distance_cal = ((point[0] - cor[0])**2 + (point[1] - cor[1])**2)**(1/2)
+                if distance_cal < min_dis:
+                    min_dis = distance_cal
+            sort_cal_edge.append(min_dis)
+        sort_cal_edge = sorted(sort_cal_edge, reverse=True)
+        error_dis_and_point[i][0].append(sort_cal_edge[0])
+    return error_dis_and_point
 
-for i in range(len(cnts_cor_newlist)):
-    sort_cal_edge = []
-    for point in cnts_cor_newlist[i][0]:
-        min_dis = 1000000
-        for cor in edges_hardP[i][0]:
-            distance_cal = ((point[0] - cor[0])**2 + (point[1] - cor[1])**2)**(1/2)
-            if distance_cal < min_dis:
-                min_dis = distance_cal
-        sort_cal_edge.append(min_dis)
-    sort_cal_edge = sorted(sort_cal_edge, reverse=True)
-    error_dis_and_point[i][0].append(sort_cal_edge[0])
+def measure(input_image_hard, input_image_cut):
+    roi_hardP, white_tor_cor_newlist, center_point_hardP, edges_hardP = hardpattern_points_process(input_image_hard)
+    cnts_cor_newlist, center_point_cut = cutpart_points_process(input_image_cut)
+    cnts_cor_newlist = merge_cutPart_to_hardP(center_point_hardP, center_point_cut, cnts_cor_newlist)
+    error_dis_and_point = error_list(cnts_cor_newlist, white_tor_cor_newlist, roi_hardP, edges_hardP)
+    return error_dis_and_point, roi_hardP
 
+image_path_hard = 'hardpart.jpg'
+image_path_cut = 'image_124.jpg'
+error_dis_and_point, roi_hardP = measure(image_path_hard, image_path_cut)
 print(error_dis_and_point)
+for i in range(len(error_dis_and_point)):   
+    if error_dis_and_point[i][0][0] > 0:
+        print("Status: NG")
+        break
+    else:
+        if i == len(error_dis_and_point):
+            print("Status: Ok")
 
-
-
-cv2.imshow("roi_hardP_124.jpg", roi_hardP)
+cv2.imwrite("/home/quangsog/Downloads/AppHBI/AppHBI/appQt/ComparisonOut/roi_hardP_124.jpg", roi_hardP)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
