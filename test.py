@@ -1,13 +1,5 @@
-from Yolo import YoloModel
-from TraditionalCV import TraditionalCV
-from CombineModel import CombineModel
-from CalculateEdge import CalculateEdgeLength
-import cv2
+P_pass = 0.852615616165161651
 
-image_path = 'hardpattern.png'
-
-list1 = [1, 2, 3]
-list2 = [4, 5, 6]
-
-joined_list = list1 + list2
-print(joined_list)
+P_pass = round((P_pass)*100, 2)
+P_reject = round(100 - P_pass, 2)
+print(P_pass, P_reject)

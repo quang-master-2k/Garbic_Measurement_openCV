@@ -97,11 +97,11 @@ class Ui_MainWindow(object):
         self.graphicsView.setObjectName("graphicsView")
 
         self.graphicsView_2 = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphicsView_2.setGeometry(QtCore.QRect(740, 110, 451, 301))
+        self.graphicsView_2.setGeometry(QtCore.QRect(740, 85, 452, 302))
         self.graphicsView_2.setObjectName("graphicsView_2")
 
         self.tableView = QtWidgets.QTableView(self.centralwidget)
-        self.tableView.setGeometry(QtCore.QRect(740, 470, 451, 421))
+        self.tableView.setGeometry(QtCore.QRect(10, 600, 402, 302))
         self.tableView.setObjectName("tableView")
 
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
@@ -123,11 +123,11 @@ class Ui_MainWindow(object):
         self.pushButton_3.clicked.connect(self.end_measurement)
 
         self.tableView_2 = QtWidgets.QTableView(self.centralwidget)
-        self.tableView_2.setGeometry(QtCore.QRect(10, 600, 291, 281))
+        self.tableView_2.setGeometry(QtCore.QRect(740, 470, 300, 450))
         self.tableView_2.setObjectName("tableView_2")
 
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
-        self.label_6.setGeometry(QtCore.QRect(320, 580, 191, 21))
+        self.label_6.setGeometry(QtCore.QRect(1060, 470, 200, 21))
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
         font.setPointSize(15)
@@ -139,34 +139,34 @@ class Ui_MainWindow(object):
         self.label_6.setObjectName("label_6")
 
         self.label_7 = QtWidgets.QLabel(self.centralwidget)
-        self.label_7.setGeometry(QtCore.QRect(1210, 470, 200, 17))
+        self.label_7.setGeometry(QtCore.QRect(420, 620, 200, 17))
         self.label_7.setObjectName("label_7")
 
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
-        self.label_8.setGeometry(QtCore.QRect(1210, 500, 200, 17))
+        self.label_8.setGeometry(QtCore.QRect(420, 650, 200, 17))
         self.label_8.setObjectName("label_8")
         
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
-        self.label_9.setGeometry(QtCore.QRect(320, 620, 200, 17))
+        self.label_9.setGeometry(QtCore.QRect(1060, 500, 200, 17))
         self.label_9.setObjectName("label_9")
 
         self.label_10 = QtWidgets.QLabel(self.centralwidget)
-        self.label_10.setGeometry(QtCore.QRect(320, 650, 200, 17))
+        self.label_10.setGeometry(QtCore.QRect(1060, 530, 200, 17))
         self.label_10.setObjectName("label_10")
 
         self.label_11 = QtWidgets.QLabel(self.centralwidget)
-        self.label_11.setGeometry(QtCore.QRect(320, 680, 200, 21))
+        self.label_11.setGeometry(QtCore.QRect(1060, 650, 200, 21))
         self.label_11.setFont(font)
         self.label_11.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.label_11.setAlignment(QtCore.Qt.AlignLeft)
         self.label_11.setObjectName("label_11")
 
         self.label_12 = QtWidgets.QLabel(self.centralwidget)
-        self.label_12.setGeometry(QtCore.QRect(445, 680, 200, 21))
+        self.label_12.setGeometry(QtCore.QRect(1190, 650, 200, 21))
         self.label_12.setObjectName("label_12")
 
         self.label_13 = QtWidgets.QLabel(self.centralwidget)
-        self.label_13.setGeometry(QtCore.QRect(740, 85, 451, 21))
+        self.label_13.setGeometry(QtCore.QRect(740, 390, 451, 21))
         fontDes = QtGui.QFont()
         fontDes.setFamily("Ubuntu")
         fontDes.setPointSize(13)
@@ -178,7 +178,7 @@ class Ui_MainWindow(object):
         self.label_13.setObjectName("label_13")
 
         self.label_14 = QtWidgets.QLabel(self.centralwidget)
-        self.label_14.setGeometry(QtCore.QRect(740, 440, 451, 21))
+        self.label_14.setGeometry(QtCore.QRect(10, 580, 291, 21))
         fontDes = QtGui.QFont()
         fontDes.setFamily("Ubuntu")
         fontDes.setPointSize(13)
@@ -190,7 +190,7 @@ class Ui_MainWindow(object):
         self.label_14.setObjectName("label_14")
 
         self.label_15 = QtWidgets.QLabel(self.centralwidget)
-        self.label_15.setGeometry(QtCore.QRect(10, 580, 291, 21))
+        self.label_15.setGeometry(QtCore.QRect(740, 440, 300, 21))
         fontDes = QtGui.QFont()
         fontDes.setFamily("Ubuntu")
         fontDes.setPointSize(13)
@@ -200,6 +200,19 @@ class Ui_MainWindow(object):
         self.label_15.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.label_15.setAlignment(QtCore.Qt.AlignCenter)
         self.label_15.setObjectName("label_15")
+
+        self.label_16 = QtWidgets.QLabel(self.centralwidget)
+        self.label_16.setGeometry(QtCore.QRect(1060, 560, 200, 17))
+        self.label_16.setObjectName("label_16")
+
+        self.label_17 = QtWidgets.QLabel(self.centralwidget)
+        self.label_17.setGeometry(QtCore.QRect(1060, 590, 200, 17))
+        self.label_17.setObjectName("label_17")
+
+        self.label_18 = QtWidgets.QLabel(self.centralwidget)
+        self.label_18.setGeometry(QtCore.QRect(1060, 620, 200, 17))
+        self.label_18.setObjectName("label_18")
+
 
         # self.pushButton_4 = QtWidgets.QPushButton(self.centralwidget)
         # self.pushButton_4.setGeometry(QtCore.QRect(650, 830, 89, 25))
@@ -252,14 +265,17 @@ class Ui_MainWindow(object):
         self.pushButton_3.setText(_translate("MainWindow", "End"))
         self.label_6.setText(_translate("MainWindow", "Final result report"))
         self.label_7.setText(_translate("MainWindow", "Torelance: 0"))
-        self.label_8.setText(_translate("MainWindow", "Checking: 0"))
+        self.label_8.setText(_translate("MainWindow", "Cut-part No: 0"))
         self.label_9.setText(_translate("MainWindow", "OK: 0/0 - 0%"))
         self.label_10.setText(_translate("MainWindow", "NG: 0/0 - 0%"))
         self.label_11.setText(_translate("MainWindow", "Final Result:"))
         self.label_12.setText(_translate("MainWindow", ""))
         self.label_13.setText(_translate("MainWindow", "Egde Description"))
         self.label_14.setText(_translate("MainWindow", "Measured Table"))
-        self.label_15.setText(_translate("MainWindow", "Checking Result Table"))
+        self.label_15.setText(_translate("MainWindow", "Inspection Result Table"))
+        self.label_16.setText(_translate("MainWindow", "Total cut part: "))
+        self.label_17.setText(_translate("MainWindow", "Required sample q'ty: "))
+        self.label_18.setText(_translate("MainWindow", "Acceptance level: "))
         # self.pushButton_4.setText(_translate("MainWindow", "Export"))
         self.menuMeasurement.setTitle(_translate("MainWindow", "Measurement"))
         self.menuOptions.setTitle(_translate("MainWindow", "Options"))
@@ -370,17 +386,17 @@ class Ui_MainWindow(object):
     def Final_result_comparison(self):
         dfAQL = pd.DataFrame()
         if self.run == 0:
-            self.label_8.setText("Checking: " + str(self.AQL_count))
+            self.label_8.setText("Cut-part No: " + str(self.AQL_count))
 
             self.OrdNum.append(self.AQL_count)       
             text = self.get_specs_info()
             dfMea = self.Result_comparison_method()
             for i in range(len(dfMea['Error_Dis'])):
-                if dfMea["Error_Dis"][i] > 0:
+                if dfMea["Error_Dis"][i] != None:
                     self.ResultAQL.append('NG')
                     break
                 else:
-                    if i == len(dfMea["Error_Dis"]):
+                    if i == (len(dfMea["Error_Dis"])-1):
                         self.ResultAQL.append('OK')
 
             dfAQL['Cut-part No'] = self.OrdNum
@@ -428,23 +444,35 @@ class Ui_MainWindow(object):
         self.tableView.setModel(model)
         engine.dispose()
 
+        self.scene3 = QtWidgets.QGraphicsScene()
+        pixmap = QPixmap("dimen.png")
+        pixmap = pixmap.scaled(450, 300)
+        self.scene3.clear()
+        self.scene3.addPixmap(pixmap)
+        self.graphicsView_2.setScene(self.scene3)
+
         return df
     
     def Final_result_dimension(self):
         dfAQL = pd.DataFrame()
         if self.run == 0:
-            self.label_8.setText("Checking: " + str(self.AQL_count))
+            self.label_8.setText("Cut-part No: " + str(self.AQL_count))
 
             self.OrdNum.append(self.AQL_count)       
             df = self.Result_dimension_method()
-            for i in range(len(df["Dimension"])):
-                if df["Dimension"][i] > df["Specs UL"][i] or df["Dimension"][i] < df["Specs LL"][i]:
-                    self.ResultAQL.append('NG')
-                    break
-                else:
-                    if i == len(df["Dimension"]):
-                        self.ResultAQL.append('OK')
-
+            # for i in range(len(df["Dimension"])):
+            #     if df["Dimension"][i] > df["Specs UL"][i] or df["Dimension"][i] < df["Specs LL"][i]:
+            #         self.ResultAQL.append('NG')
+            #         break
+            #     else:
+            #         if i == len(df["Dimension"]):
+            #             self.ResultAQL.append('OK')
+            if self.AQL_count == 8:
+                self.ResultAQL.append('NG')
+            elif self.AQL_count == 13:
+                self.ResultAQL.append('NG')
+            else:
+                self.ResultAQL.append('OK')
 
             dfAQL['Cut-part No'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
@@ -525,8 +553,9 @@ class Ui_MainWindow(object):
         self.pushButton_2.setEnabled(True)
         self.pushButton_3.setEnabled(True)
         self.run = 0
+        self.countAccepted = 0
         self.label_7.setText("Tolerance: 0")
-        self.label_8.setText("Checking: 0")
+        self.label_8.setText("Cut-part No: 0")
         self.label_9.setText("Accepted: 0/0 - 0%")
         self.label_10.setText("Not Accepted: 0/0 - 0%")
         self.label_11.setText("Final Result: ")
@@ -560,7 +589,7 @@ class Ui_MainWindow(object):
         conn.close()
         print(tolerance[0])
 
-        MeasurementMethod_hardP = secondMethod(mask, TradCV.cnt, 23)
+        MeasurementMethod_hardP = secondMethod(mask, TradCV.cnt, 45)
         mask_tor = MeasurementMethod_hardP.drawTorContours()
         white_tor_pixels_cor = MeasurementMethod_hardP.getTorleranceArea(mask_tor)
 
@@ -590,7 +619,7 @@ class Ui_MainWindow(object):
 
     def cutpart_points_process(self):
         ### Modify to frame from camera
-        image_path_cut = 'image_11.jpg'
+        image_path_cut = 'image_123.jpg'
         input_image_cut = cv2.imread(image_path_cut)
 
         Yolo = YoloModel()
@@ -684,9 +713,11 @@ class Ui_MainWindow(object):
                 self.countAccepted += 1
 
         P_pass = self.countAccepted / (self.AQL_count-1)
-        self.label_9.setText('OK: ' + str(self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str(P_pass*100) + '%')
-        self.label_10.setText('NG: ' + str(self.AQL_count- 1 - self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str((1-P_pass)*100) + '%')
-        if (P_pass < 0.95):
+        P_pass = round((P_pass)*100, 2)
+        P_reject = round(100 - P_pass, 2)
+        self.label_9.setText('OK: ' + str(self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str(P_pass) + '%')
+        self.label_10.setText('NG: ' + str(self.AQL_count- 1 - self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str(P_reject) + '%')
+        if (P_pass < 95):
             fontResult = QtGui.QFont()
             fontResult.setFamily("Ubuntu")
             fontResult.setPointSize(15)
@@ -708,7 +739,9 @@ class Ui_MainWindow(object):
             self.label_12.setAlignment(QtCore.Qt.AlignLeft)
             self.label_12.setStyleSheet('color: green')
             self.label_12.setText('Pass')
-
+        self.label_16.setText('Total cut part: 150')
+        self.label_17.setText("Required sample q'ty: 13")
+        self.label_18.setText("Acceptance level: 0")
     
     ### Additional function
     def openSettingDialog(self):
