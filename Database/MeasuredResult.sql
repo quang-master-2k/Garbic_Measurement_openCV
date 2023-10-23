@@ -7,11 +7,13 @@ CREATE TABLE MeasuredResult (
     Size INT,
     Dimension_Name VARCHAR(255),
     Dimension_Value FLOAT,
-    Dimension_Result BIT,
+    Dimension_Result VARCHAR(255),
     Comparison_Edge VARCHAR(255),
     Error_Distance FLOAT,
-    Max_Distance Float
+    Max_Distance FLOAT
 )
+
+SELECT * FROM MeasuredResult
 
 Insert into MeasuredResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Dimension_Name, Dimension_Value, Dimension_Result, Comparison_Edge, Error_Distance, Max_Distance)
 VALUES ('Oct 11th, 2023', '10:02:59', 'A', 'B', 'c', 6, 'L8/AC954CBKF-3', 15.29, 1, 5, 5.6, 5.6)

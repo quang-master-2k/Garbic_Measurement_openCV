@@ -1,5 +1,7 @@
-P_pass = 0.852615616165161651
+import datetime
 
-P_pass = round((P_pass)*100, 2)
-P_reject = round(100 - P_pass, 2)
-print(P_pass, P_reject)
+# Get the current date and time
+current_date = datetime.date.today()
+current_time = datetime.datetime.now().time()
+# Print the current date and time
+print(current_date, 'aaa', current_time)

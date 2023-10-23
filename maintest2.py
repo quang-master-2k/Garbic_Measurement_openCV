@@ -589,7 +589,7 @@ class Ui_MainWindow(object):
         conn.close()
         print(tolerance[0])
 
-        MeasurementMethod_hardP = secondMethod(mask, TradCV.cnt, 45)
+        MeasurementMethod_hardP = secondMethod(mask, TradCV.cnt, 23)
         mask_tor = MeasurementMethod_hardP.drawTorContours()
         white_tor_pixels_cor = MeasurementMethod_hardP.getTorleranceArea(mask_tor)
 
