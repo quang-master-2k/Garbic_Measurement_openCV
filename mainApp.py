@@ -408,26 +408,26 @@ class Ui_MainWindow(object):
             self.OrdNum.append(self.AQL_count)   
 
             dfComparison = self.Result_comparison_method()
-            current_date = datetime.date.today()
-            current_time = datetime.datetime.now().time()
-            text = self.get_specs_info()
-            server = 'quangsog-Inspiron-5570'
-            database = 'HBI_app'
-            username = 'sa'
-            password = '123456Qa'
-            connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-            conn = pyodbc.connect(connection_string)
-            for i in range(len(dfComparison["Edge"])):
-                if pd.isna(dfComparison["Error_Dis"][i]):
-                    text_query_comparison_result = [current_date, current_time, text[0], text[1], text[2], text[3], None, None, None, str(dfComparison["Edge"][i]), None, dfComparison['Max_Dis'][i]]
-                else:
-                    text_query_comparison_result = [current_date, current_time, text[0], text[1], text[2], text[3], None, None, None, str(dfComparison["Edge"][i]), dfComparison["Error_Dis"][i], dfComparison['Max_Dis'][i]]    
-                sql = '''INSERT INTO MeasuredResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Dimension_Name, Dimension_Value, Dimension_Result, Comparison_Edge, Error_Distance, Max_Distance)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
+            # current_date = datetime.date.today()
+            # current_time = datetime.datetime.now().time()
+            # text = self.get_specs_info()
+            # server = 'quangsog-Inspiron-5570'
+            # database = 'HBI_app'
+            # username = 'sa'
+            # password = '123456Qa'
+            # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+            # conn = pyodbc.connect(connection_string)
+            # for i in range(len(dfComparison["Edge"])):
+            #     if pd.isna(dfComparison["Error_Dis"][i]):
+            #         text_query_comparison_result = [current_date, current_time, text[0], text[1], text[2], text[3], None, None, None, str(dfComparison["Edge"][i]), None, dfComparison['Max_Dis'][i]]
+            #     else:
+            #         text_query_comparison_result = [current_date, current_time, text[0], text[1], text[2], text[3], None, None, None, str(dfComparison["Edge"][i]), dfComparison["Error_Dis"][i], dfComparison['Max_Dis'][i]]    
+            #     sql = '''INSERT INTO MeasuredResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Dimension_Name, Dimension_Value, Dimension_Result, Comparison_Edge, Error_Distance, Max_Distance)
+            #                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
 
-                conn.execute(sql, text_query_comparison_result)
-            conn.commit()
-            conn.close()
+            #     conn.execute(sql, text_query_comparison_result)
+            # conn.commit()
+            # conn.close()
 
             for i in range(len(dfComparison['Error_Dis'])):
                 if dfComparison["Error_Dis"][i] != None:
@@ -453,21 +453,24 @@ class Ui_MainWindow(object):
     # Dimension method
     # df: detailed results of dimension 
     def Result_dimension_method(self):
-        text_insert = self.get_specs_info()
-        server = 'quangsog-Inspiron-5570'
-        database = 'HBI_app'
-        username = 'sa'
-        password = '123456Qa'
-        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-        engine = create_engine(f'mssql+pyodbc:///?odbc_connect={connection_string}')
+        # text_insert = self.get_specs_info()
+        # server = 'quangsog-Inspiron-5570'
+        # database = 'HBI_app'
+        # username = 'sa'
+        # password = '123456Qa'
+        # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        # engine = create_engine(f'mssql+pyodbc:///?odbc_connect={connection_string}')
 
-        query = f"SELECT Dimension_Name, Dimension_Value FROM DimensionDatabase WHERE Garment_Style = '{text_insert[0]}' AND Pattern_Code = '{text_insert[1]}' AND Piece_Name = '{text_insert[2]}' AND Size = {text_insert[3]}"
-        df = pd.read_sql(query, engine)
-        new_column_names = {'Dimension_Name': 'Name', 'Dimension_Value': 'Specs LL'}
-        df.rename(columns=new_column_names, inplace=True)
+        # query = f"SELECT Dimension_Name, Dimension_Value FROM DimensionDatabase WHERE Garment_Style = '{text_insert[0]}' AND Pattern_Code = '{text_insert[1]}' AND Piece_Name = '{text_insert[2]}' AND Size = {text_insert[3]}"
+        # df = pd.read_sql(query, engine)
+        # new_column_names = {'Dimension_Name': 'Name', 'Dimension_Value': 'Specs LL'}
+        # df.rename(columns=new_column_names, inplace=True)
 
         # Upper limit and lower limit
         # Need to modify based on result of dimension
+        df = pd.DataFrame()
+        df['Name'] = ['L1','L2','L3','L4','L5','L6','L7','L8']
+        df['Specs LL'] = [1,2,3,4,5,6,7,8]
         df['Specs UL'] = df["Specs LL"] + 1/8
         df["Specs LL"] = df['Specs LL'] - 1/8
         listLength = self.finalLengthList
@@ -478,7 +481,7 @@ class Ui_MainWindow(object):
         headers = list(df.head(0))
         model = PandasModel(df)
         self.tableView.setModel(model)
-        engine.dispose()
+        # engine.dispose()
 
         self.scene3 = QtWidgets.QGraphicsScene()
         pixmap = QPixmap("dimen.png")
@@ -498,25 +501,25 @@ class Ui_MainWindow(object):
             self.OrdNum.append(self.AQL_count)      
 
             df = self.Result_dimension_method()
-            current_date = datetime.date.today()
-            current_time = datetime.datetime.now().time()
-            text = self.get_specs_info()
-            server = 'quangsog-Inspiron-5570'
-            database = 'HBI_app'
-            username = 'sa'
-            password = '123456Qa'
-            connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-            conn = pyodbc.connect(connection_string)
-            for i in range(len(df["Dimension"])):
-                if df["Dimension"][i] > df["Specs UL"][i] or df["Dimension"][i] < df["Specs LL"][i]:
-                    text_query_dimension_result = [current_date, current_time, text[0], text[1], text[2], text[3], df['Name'][i], df["Dimension"][i], 'NG', None, None, None]    
-                else:
-                    text_query_dimension_result = [current_date, current_time, text[0], text[1], text[2], text[3], df['Name'][i], df["Dimension"][i], "OK", None, None, None]
-                sql = '''INSERT INTO MeasuredResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Dimension_Name, Dimension_Value, Dimension_Result, Comparison_Edge, Error_Distance, Max_Distance)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
-                conn.execute(sql, text_query_dimension_result)
-            conn.commit()
-            conn.close()
+            # current_date = datetime.date.today()
+            # current_time = datetime.datetime.now().time()
+            # text = self.get_specs_info()
+            # server = 'quangsog-Inspiron-5570'
+            # database = 'HBI_app'
+            # username = 'sa'
+            # password = '123456Qa'
+            # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+            # conn = pyodbc.connect(connection_string)
+            # for i in range(len(df["Dimension"])):
+            #     if df["Dimension"][i] > df["Specs UL"][i] or df["Dimension"][i] < df["Specs LL"][i]:
+            #         text_query_dimension_result = [current_date, current_time, text[0], text[1], text[2], text[3], df['Name'][i], df["Dimension"][i], 'NG', None, None, None]    
+            #     else:
+            #         text_query_dimension_result = [current_date, current_time, text[0], text[1], text[2], text[3], df['Name'][i], df["Dimension"][i], "OK", None, None, None]
+            #     sql = '''INSERT INTO MeasuredResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Dimension_Name, Dimension_Value, Dimension_Result, Comparison_Edge, Error_Distance, Max_Distance)
+            #                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
+            #     conn.execute(sql, text_query_dimension_result)
+            # conn.commit()
+            # conn.close()
 
             for i in range(len(df["Dimension"])):
                 if df["Dimension"][i] > df["Specs UL"][i] or df["Dimension"][i] < df["Specs LL"][i]:
@@ -633,23 +636,25 @@ class Ui_MainWindow(object):
         cv_corners, mask = TradCV.final_corner, TradCV.mask_accurate
 
         ### Thickness reflect tolerance
-        text_insert = self.get_specs_info()
-        server = 'quangsog-Inspiron-5570'
-        database = 'HBI_app'
-        username = 'sa'
-        password = '123456Qa'
-        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-        conn = pyodbc.connect(connection_string)
-        sql_thickness = "SELECT Tolerance FROM ComparisonDatabase WHERE Garment_Style = ? AND Pattern_Code = ? AND Piece_Name = ?"
-        text_query_thickness = [text_insert[0], text_insert[1], text_insert[2]]
-        tolerance = conn.execute(sql_thickness, text_query_thickness).fetchone()
-        conn.commit()
-        conn.close()
-        ### Tor (inches) * 2.54 * pixel/cm * 2 = thickness
-        thickness = tolerance[0]* 2.54 * 35 * 2
-        thickness = math.ceil(thickness)
-        label7 = Fraction(float(tolerance[0])).limit_denominator()
-        self.label_7.setText("Tolerance: " + str(label7))
+        # text_insert = self.get_specs_info()
+        # server = 'quangsog-Inspiron-5570'
+        # database = 'HBI_app'
+        # username = 'sa'
+        # password = '123456Qa'
+        # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        # conn = pyodbc.connect(connection_string)
+        # sql_thickness = "SELECT Tolerance FROM ComparisonDatabase WHERE Garment_Style = ? AND Pattern_Code = ? AND Piece_Name = ?"
+        # text_query_thickness = [text_insert[0], text_insert[1], text_insert[2]]
+        # tolerance = conn.execute(sql_thickness, text_query_thickness).fetchone()
+        # conn.commit()
+        # conn.close()
+        # ### Tor (inches) * 2.54 * pixel/cm * 2 = thickness
+        # thickness = tolerance[0]* 2.54 * 35 * 2
+        # thickness = math.ceil(thickness)
+        # label7 = Fraction(float(tolerance[0])).limit_denominator()
+        # self.label_7.setText("Tolerance: " + str(label7))
+
+        thickness = 23
         MeasurementMethod_hardP = secondMethod(mask, TradCV.cnt, thickness)    
         mask_tor = MeasurementMethod_hardP.drawTorContours()
         white_tor_pixels_cor = MeasurementMethod_hardP.getTorleranceArea(mask_tor)
@@ -787,15 +792,15 @@ class Ui_MainWindow(object):
         self.label_9.setText('OK: ' + str(self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str(P_pass) + '%')
         self.label_10.setText('NG: ' + str(self.AQL_count- 1 - self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str(P_reject) + '%')
 
-        current_date = datetime.date.today()
-        current_time = datetime.datetime.now().time()
-        text = self.get_specs_info()
-        server = 'quangsog-Inspiron-5570'
-        database = 'HBI_app'
-        username = 'sa'
-        password = '123456Qa'
-        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-        conn = pyodbc.connect(connection_string)
+        # current_date = datetime.date.today()
+        # current_time = datetime.datetime.now().time()
+        # text = self.get_specs_info()
+        # server = 'quangsog-Inspiron-5570'
+        # database = 'HBI_app'
+        # username = 'sa'
+        # password = '123456Qa'
+        # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        # conn = pyodbc.connect(connection_string)
         
         #P_Pass is AQL standard - need modify to follow AQL standard
         if (P_pass < 95):
@@ -809,7 +814,7 @@ class Ui_MainWindow(object):
             self.label_12.setAlignment(QtCore.Qt.AlignLeft)
             self.label_12.setStyleSheet('color: red')
             self.label_12.setText('Reject')
-            text_final_query = [current_date, current_time, text[0], text[1], text[2], text[3], (self.AQL_count -1), self.countAccepted, (self.AQL_count -1 - self.countAccepted), "Reject"]
+            # text_final_query = [current_date, current_time, text[0], text[1], text[2], text[3], (self.AQL_count -1), self.countAccepted, (self.AQL_count -1 - self.countAccepted), "Reject"]
         else:
             fontResult = QtGui.QFont()
             fontResult.setFamily("Ubuntu")
@@ -821,13 +826,13 @@ class Ui_MainWindow(object):
             self.label_12.setAlignment(QtCore.Qt.AlignLeft)
             self.label_12.setStyleSheet('color: green')
             self.label_12.setText('Pass')
-            text_final_query = [current_date, current_time, text[0], text[1], text[2], text[3], (self.AQL_count -1), self.countAccepted, (self.AQL_count -1 - self.countAccepted), "Pass"]
+            # text_final_query = [current_date, current_time, text[0], text[1], text[2], text[3], (self.AQL_count -1), self.countAccepted, (self.AQL_count -1 - self.countAccepted), "Pass"]
 
-        sql = '''INSERT INTO FinalResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Number_checking, Accepted, Not_Accepted, FinalResult)
-            VALUES (?,?,?,?,?,?,?,?,?,?)'''
-        conn.execute(sql, text_final_query)
-        conn.commit()
-        conn.close()
+        # sql = '''INSERT INTO FinalResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Number_checking, Accepted, Not_Accepted, FinalResult)
+        #     VALUES (?,?,?,?,?,?,?,?,?,?)'''
+        # conn.execute(sql, text_final_query)
+        # conn.commit()
+        # conn.close()
 
         self.label_16.setText('Total cut part: 150')
         self.label_17.setText("Required sample q'ty: 13")
