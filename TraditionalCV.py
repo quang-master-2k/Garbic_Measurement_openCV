@@ -1,34 +1,35 @@
 import cv2
 import numpy as np
+import os
 from skimage.filters.thresholding import threshold_isodata
+import time
 
 class TraditionalCV:
-    def __init__(self, thresholdType, numCorners, crop_w = 60, crop_h = 60, positionThatHaveTwoCorners = []):
+    def __init__(self, threshold_type, num_corners, crop_w = 60, crop_h = 60, position_that_have_two_corners = []):
         # This is the constructor method
         # Initialize instance variables here
-        self.thresholdType = thresholdType
-        self.numCorners = numCorners
+        self.threshold_type = threshold_type
+        self.num_corners = num_corners
         self.crop_w = crop_w
         self.crop_h = crop_h
         self.image = None
         self.threshold = None
-        self.finalCorner = None
-        self.finalImageColor = None
-        self.finalImageBinary = None
-        self.maskGeneralized = None
-        self.maskAccurate = None
+        self.final_corner = None
+        self.final_image_color = None
+        self.final_image_binary = None
+        self.mask_generalized = None
+        self.mask_accurate = None
         self.cnt = None
-        self.cntList = []
-        self.positionThatHaveTwoCorners = positionThatHaveTwoCorners
-
+        self.position_that_have_two_corners = position_that_have_two_corners
+        self.crop_image = []
 
     def change_crop_size(self, width, height):
         self.crop_w = width
         self.crop_h = height
 
-    def image_RGB_Gray_mask(self, input_image):
-        imgColor = input_image
-        imgGray = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
+    def read_image(self, input_image_path):
+        imgColor = input_image_path
+        imgGray = cv2.cvtColor(input_image_path, cv2.COLOR_BGR2GRAY)
 
         # Applying the filter
         #imgColor = cv2.GaussianBlur(imgColor,gaussian_kernel_size,0)
@@ -37,9 +38,9 @@ class TraditionalCV:
         mask = np.zeros_like(imgColor)
         return imgColor, imgGray, mask
     
-    def binary_contours(self, input_imgGray, thresholdType):
+    def binary_contours(self, input_imgGray, threshold_type):
         binaryThreshold = threshold_isodata(input_imgGray)
-        _, threshold = cv2.threshold(input_imgGray, binaryThreshold, 255, thresholdType)
+        _, threshold = cv2.threshold(input_imgGray, binaryThreshold, 255, threshold_type)
         contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         return threshold, contours
 
@@ -56,22 +57,22 @@ class TraditionalCV:
         
         approx = cv2.approxPolyDP(cnt, eps*cv2.arcLength(cnt, True), True)
         
-        cv2.drawContours(mask, [approx], 0, (255, 255, 255), 1) 
+        cv2.drawContours(mask, [approx], 0, (0, 0, 255), 1)
         cv2.drawContours(imgColor, [approx], 0, (0, 0, 255), 1)
 
         return imgColor, mask, approx, cnt
 
     
-    def drawCorners(self, mask, imgColor, numCorners, qualityLevel = 0.1, minDistance = 10, blockSize = 15, pointSize = 8):
+    def draw_corners(self, mask, imgColor, num_corners, qualityLevel = 0.1, minDistance = 10, blockSize = 15, pointSize = 8):
         mask = cv2.cvtColor(mask, cv2.COLOR_RGB2GRAY)
-        corners = cv2.goodFeaturesToTrack(mask, numCorners, qualityLevel = qualityLevel, minDistance = minDistance, blockSize = blockSize)
+        corners = cv2.goodFeaturesToTrack(mask, num_corners, qualityLevel = qualityLevel, minDistance = minDistance, blockSize = blockSize)
         corners = np.int0(corners)
         for i in corners:
             x, y = i.ravel()
             cv2.circle(imgColor, (x, y), pointSize,  (0, 255, 0), -1)
-        return mask, corners
+        return imgColor, corners
         
-    def sortCorners(self, corners):
+    def sort_corners(self, corners):
         mid_corner = int(len(corners) / 2)
 
         for i in range(len(corners)):
@@ -100,11 +101,11 @@ class TraditionalCV:
 
         return corners
 
-
     def euclidean_distance(self, point1, point2):
         return np.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
-    def findPositionCornerPoints(self, corner_x, contours):
+    def find_closest_position_corner(self, corner_x, contours):
+        # Find the closest point in contours to the given corner
         min_distance = float('inf')
         closest_index = -1
 
@@ -135,7 +136,9 @@ class TraditionalCV:
         return cropped_image
     
         
-    def findSpecCorner(self, cornerIndex, numberOfCorners,  threshold, mask, tempCorner, show = False, qualityOfLevel = 0.3, minOfDistance = 20, blockOfSize = 5, applyBlur = False):
+    def find_crop_area_of_corner(self, cornerIndex, numberOfCorners,  threshold, mask, tempCorner, show = False, qualityOfLevel = 0.3, minOfDistance = 20, blockOfSize = 5, applyBlur = False):
+        # Crop the area around temporal corners
+        
         center_x = tempCorner[cornerIndex][0][0][0]  # X-coordinate of the center point
         center_y = tempCorner[cornerIndex][0][0][1]  # Y-coordinate of the center point
         crop_width = self.crop_w  # Width of the cropped region
@@ -145,15 +148,9 @@ class TraditionalCV:
         imgColor_temp = cv2.cvtColor(imgGray_temp, cv2.COLOR_GRAY2BGR)
 
         mask_temp = self.crop_image_from_point(mask, center_x, center_y, crop_width, crop_height)
-        #cv2_imshow(mask_temp)
-        #mask_temp = cv2.cvtColor(mask_temp, cv2.COLOR_GRAY2BGR)
 
-        #if show == True:
-        #    cv2_imshow(mask_temp)
-
-        mask_temp, corners_temp = self.drawCorners(mask_temp, imgColor_temp, numCorners = numberOfCorners, qualityLevel = qualityOfLevel, minDistance = minOfDistance, blockSize = blockOfSize, pointSize = 3)
-
-        #cv2.imshow( "Corner {}".format(cornerIndex), imgColor_temp)
+        mask_temp, corners_temp = self.draw_corners(mask_temp, imgColor_temp, num_corners = numberOfCorners, qualityLevel = qualityOfLevel, minDistance = minOfDistance, blockSize = blockOfSize, pointSize = 3)
+        self.crop_image.append(mask_temp)
 
         return corners_temp, [center_x, center_y], [crop_width, crop_height], cornerIndex
     
@@ -164,7 +161,9 @@ class TraditionalCV:
         image = cv2.circle(image, point, 5, (0, 0, 255), -1)
         return image
 
-    def drawSpecCorner(self, corners_temp, center, crop, imgColor, imgGray, cornerList_temp, cornerIndex, show = False):
+    def draw_crop_corner(self, corners_temp, center, crop, imgColor, imgGray, cornerList_temp, cornerIndex, show = False):
+        # Draw cropped area, for visualization purpose
+
         center_x = center[0]
         center_y = center[1]
         crop_width = crop[0]
@@ -176,7 +175,6 @@ class TraditionalCV:
         if len(corners_temp) == 1:
             index = 0
             point_in_original = (x + corners_temp[index][0][0], y + corners_temp[index][0][1])
-            #print(point_in_original)
             resultColor = self.draw_point_on_image(imgColor, point_in_original)
             resultGray = self.draw_point_on_image(imgGray, point_in_original)
 
@@ -200,51 +198,56 @@ class TraditionalCV:
 
         return resultColor, resultGray, cornerList_temp
 
-    def finalSpecCorner(self, threshold, mask, imgColor, imgGray, tempCorner, show = False):
+    def final_spec_corner(self, threshold, mask, imgColor, imgGray, tempCorner, show = False):
+        # Final corners, according to specs data
+        
         cornerList_temp = []
-        for i in range(self.numCorners):
-            if i in self.positionThatHaveTwoCorners:
-                corners_temp, center_temp, crop_temp, cornerIndex = self.findSpecCorner(i, 2, threshold, mask, tempCorner, show = False, qualityOfLevel = 0.1, minOfDistance = 5, blockOfSize = 10)
-                resultColor, resultGray, cornerList_temp = self.drawSpecCorner(corners_temp, center_temp, crop_temp, imgColor, imgGray, cornerList_temp, cornerIndex)
-            else:
-                corners_temp, center_temp, crop_temp, cornerIndex = self.findSpecCorner(i, 1, threshold, mask, tempCorner, show = False, qualityOfLevel = 0.3, minOfDistance = 20, blockOfSize = 10)
-                resultColor, resultGray, cornerList_temp = self.drawSpecCorner(corners_temp, center_temp, crop_temp, imgColor, imgGray, cornerList_temp, cornerIndex)
-        #if show == True:
-        #    cv2_imshow(finalResult)
 
- 
+        for i in range(self.num_corners):
+            if i in self.position_that_have_two_corners:
+                corners_temp, center_temp, crop_temp, cornerIndex = self.find_crop_area_of_corner(i, 2, threshold, mask, tempCorner, show = False, qualityOfLevel = 0.1, minOfDistance = 5, blockOfSize = 8)
+                resultColor, resultGray, cornerList_temp = self.draw_crop_corner(corners_temp, center_temp, crop_temp, imgColor, imgGray, cornerList_temp, cornerIndex)
+            else:
+                corners_temp, center_temp, crop_temp, cornerIndex = self.find_crop_area_of_corner(i, 1, threshold, mask, tempCorner, show = False, qualityOfLevel = 0.3, minOfDistance = 20, blockOfSize = 4)
+                resultColor, resultGray, cornerList_temp = self.draw_crop_corner(corners_temp, center_temp, crop_temp, imgColor, imgGray, cornerList_temp, cornerIndex)
 
         return resultColor, resultGray, cornerList_temp
 
     def process(self, image_path):
-        # This is a method of the class
-        # You can perform actions using instance variables and parameters
-        # For example:
-        imgColor, imgGray, mask = self.image_RGB_Gray_mask(image_path)
+        imgColor, imgGray, mask = self.read_image(image_path)
         self.image = imgColor.copy()
 
-        self.threshold, contours = self.binary_contours(imgGray, self.thresholdType)
+        self.threshold, contours = self.binary_contours(imgGray, self.threshold_type)
         
-
-        imgColor_2, mask_2, cutpartContours_2, cnt1 = self.drawContours_imgColor_mask(contours, imgColor.copy(), mask.copy(), eps = 0.000001)
+        
+        imgColor_2, mask_2, cutpartContours_2, cnt1 = self.drawContours_imgColor_mask(contours, imgColor.copy(), mask.copy(), eps = 0.0000001)
         self.cnt = cnt1
-        cv2.imwrite('mask.png', mask_2)
         imgColor_1, mask_1, cutpartContours_1, cnt2 = self.drawContours_imgColor_mask(contours, imgColor.copy(), mask.copy(), eps = 0.003)
+        
+        mask_final, corners = self.draw_corners(mask_1, imgColor_1, self.num_corners)
 
-       
-        mask_final, corners = self.drawCorners(mask_1, imgColor_1, self.numCorners)
-
-        corners = self.sortCorners(corners)
+        corners = self.sort_corners(corners)
         tempCorner = []
         positionCornerList = []
 
         for i in range(len(corners)):
-            positionCornerList.append(self.findPositionCornerPoints(corners[i], cutpartContours_2))
-            tempCorner.append([corners[i], self.findPositionCornerPoints(corners[i], cutpartContours_2)])
+            positionCornerList.append(self.find_closest_position_corner(corners[i], cutpartContours_2))
+            tempCorner.append([corners[i], self.find_closest_position_corner(corners[i], cutpartContours_2)])
 
-        self.finalImageColor, self.finalImageBinary, self.finalCorner = self.finalSpecCorner(self.threshold, mask_2, imgColor.copy(),  cv2.cvtColor(self.threshold, cv2.COLOR_GRAY2RGB).copy(), tempCorner, False)
-        self.maskGeneralized = mask_1
-        self.maskAccurate = mask_2
+        self.final_image_color, self.final_image_binary, self.final_corner = self.final_spec_corner(self.threshold, mask_2, imgColor.copy(),  cv2.cvtColor(self.threshold, cv2.COLOR_GRAY2RGB).copy(), tempCorner, False)
+        self.mask_generalized = mask_1
+        self.mask_accurate = mask_2
+
+    def number_point_on_image(self):
+        for value in self.final_corner:
+            cv2.putText(self.final_image_color, str(value[1][0]), value[0], cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 125, 125), 2, lineType=cv2.LINE_AA)
+
+    def plotting(self, outputFolder):
+        cv2.imwrite(os.path.join(outputFolder, "traditionCV.png"), self.final_image_color)
+        for i in range(len(self.crop_image)):
+            cv2.imwrite(os.path.join(outputFolder, "crop_{}.png".format(i)), self.crop_image[i])
+
+        cv2.imwrite(os.path.join(outputFolder, "threshold.png"), self.threshold)
 
 
 

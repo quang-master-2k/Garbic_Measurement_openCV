@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 
 from skimage import filters
 from skimage.filters.thresholding import threshold_isodata
@@ -16,10 +17,10 @@ class CalculateEdgeLength:
         elif len(image.shape) == 3:
             self.image = image
 
-        self.finalLengthList = []
-        self.edgeImage = None
-        self.contoursImage = None
-        self.cornersImage = None
+        self.final_length_list = []
+        self.edge_image = None
+        self.contours_image = None
+        self.corners_image = None
         self.color = [
             (0, 215, 255), 
             (128, 0, 0),
@@ -27,11 +28,11 @@ class CalculateEdgeLength:
              (128, 128, 128),
             (230, 216, 173),
             (0, 201, 87),
-            (185, 218, 255),
+            (100, 218, 255),
             (79, 79, 47)
         ]
-        self.edgeList = []
-        self.edgePointsList = []
+        
+        self.edge_points_list = []
 
     def binary_contours(self, input_imgGray, thresholdType):
         binaryThreshold = threshold_isodata(input_imgGray)
@@ -42,7 +43,8 @@ class CalculateEdgeLength:
     def euclidean_distance(self, point1, point2):
         return np.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
-    def findPositionCornerPoints(self, corner_x, contours):
+    def find_closest_position_corner(self, corner_x, contours):
+        # Find the closest point in contours to the given corner
         min_distance = float('inf')
         closest_index = -1
 
@@ -54,9 +56,9 @@ class CalculateEdgeLength:
 
         return closest_index
         
-    def createLineIterator(self, P1, P2, img):
+    def create_line_iterator(self, P1, P2, img):
         """
-        Produces and array that consists of the coordinates and intensities of each pixel in a line between two points
+        Produces an array that consists of the coordinates and intensities of each pixel in a line between two points
 
         Parameters:
             -P1: a numpy array that consists of the coordinate of the first point (x,y)
@@ -125,12 +127,12 @@ class CalculateEdgeLength:
         return itbuffer
 
     def process(self):
-        self.edgeImage = self.image.copy()
-        self.contoursImage = self.image.copy()
-        self.cornersImage = self.image.copy()
+        self.edge_image = self.image.copy()
+        self.contours_image = self.image.copy()
+        self.corners_image = self.mask.copy()
 
         for value in self.corners:
-            self.cornersImage = cv2.circle(self.cornersImage, value, 2, (0,0,255), -1)
+            self.corners_image = cv2.circle(self.corners_image, value, 2, (255,0,255), -1)
 
         tempCornerFinal = self.corners
         imgGrayMask = cv2.cvtColor(self.mask, cv2.COLOR_BGR2GRAY)
@@ -148,14 +150,15 @@ class CalculateEdgeLength:
         positionCornerList = []
 
         for i in range(len(tempCornerFinal)):
-            positionCornerList.append(self.findPositionCornerPoints([tempCornerFinal[i]], tempContour))
-            tempCorner.append([np.array(tempCornerFinal[i]), self.findPositionCornerPoints([tempCornerFinal[i]], tempContour)])
+            positionCornerList.append(self.find_closest_position_corner([tempCornerFinal[i]], tempContour))
+            tempCorner.append([np.array(tempCornerFinal[i]), self.find_closest_position_corner([tempCornerFinal[i]], tempContour)])
 
         colorCount = 0
+        
         for index in range(len(tempCorner)):
             if tempCorner[index % len(tempCorner)][1] < tempCorner[(index+1) % len(tempCorner)][1]:
                 pointsList = []
-                length = cv2.arcLength(contourCalculate[tempCorner[index % len(tempCorner)][1]:tempCorner[(index+1) % len(tempCorner)][1]], False)
+                #length = cv2.arcLength(contourCalculate[tempCorner[index % len(tempCorner)][1]:tempCorner[(index+1) % len(tempCorner)][1]], False)
                 
                 pointsContours1 = np.array([point[0] for point in contourCalculate[tempCorner[index % len(tempCorner)][1]:tempCorner[(index+1) % len(tempCorner)][1]]], dtype=np.int32)
                 pointsContours2 = np.array([[contourCalculate[tempCorner[(index+1) % len(tempCorner)][1]][0][0], contourCalculate[tempCorner[(index+1) % len(tempCorner)][1]][0][1]]], dtype=np.int32)
@@ -163,49 +166,62 @@ class CalculateEdgeLength:
 
                 pointsList.append([pointsContours[0][0], pointsContours[0][1]])
                 for i in range(len(pointsContours)-1):
-                    tempList = self.createLineIterator(pointsContours[i], pointsContours[i+1], self.mask)
+                    tempList = self.create_line_iterator(pointsContours[i], pointsContours[i+1], self.mask)
                     for j in tempList:
                        pointsList.append([j[0], j[1]])
-                self.edgePointsList.append([pointsList, colorCount])  
-                 
+                self.edge_points_list.append([pointsList, colorCount])  
+                
+                length = cv2.arcLength(np.array(pointsList, dtype=int).reshape(-1, 1, 2), False)
+                #print(length)
+
                 for points in pointsList:
-                    self.edgeImage = cv2.circle(self.edgeImage, (int(points[0]), int(points[1])), 1,  self.color[colorCount], -1)
+                    self.edge_image = cv2.circle(self.edge_image, (int(points[0]), int(points[1])), 1,  self.color[colorCount], -1)
                 
                 for points in pointsContours:
-                   self.contoursImage = cv2.circle(self.contoursImage, (points[0], points[1]), 1, self.color[colorCount], -1)
+                   self.contours_image = cv2.circle(self.contours_image, (points[0], points[1]), 1, self.color[colorCount], -1)
             else:
                 pointsList = []
-                length = cv2.arcLength(contourCalculate[tempCorner[index % len(tempCorner)][1]:], False) + cv2.arcLength(contourCalculate[:tempCorner[(index+1) % len(tempCorner)][1]], False)
+                #length = cv2.arcLength(contourCalculate[tempCorner[index % len(tempCorner)][1]:], False) + cv2.arcLength(contourCalculate[:tempCorner[(index+1) % len(tempCorner)][1]], False)
                 
                 pointsContours1 = np.array([point[0] for point in contourCalculate[tempCorner[index % len(tempCorner)][1]::]], dtype=np.int32)
                 pointsContours2 = np.array([point[0] for point in contourCalculate[:tempCorner[(index+1) % len(tempCorner)][1]]], dtype=np.int32)
                 pointsContours3 = np.array([[contourCalculate[tempCorner[(index+1) % len(tempCorner)][1]][0][0], contourCalculate[tempCorner[(index+1) % len(tempCorner)][1]][0][1]]], dtype=np.int32)
+
                 if(len(pointsContours2) != 0):
                     pointsContours = np.concatenate((pointsContours1, pointsContours2, pointsContours3))
-                pointsContours = np.concatenate((pointsContours1, pointsContours3))
+                else:
+                    pointsContours = np.concatenate((pointsContours1, pointsContours3))
 
                 pointsList.append([pointsContours1[0][0], pointsContours1[0][1]])
                 for i in range(len(pointsContours)-1):
-                    tempList = self.createLineIterator(pointsContours[i], pointsContours[i+1], self.mask)   
+                    tempList = self.create_line_iterator(pointsContours[i], pointsContours[i+1], self.mask)   
                     for j in tempList:
                         pointsList.append([j[0], j[1]])
-                    
+                
+                length = cv2.arcLength(np.array(pointsList, dtype=int).reshape(-1, 1, 2), False)
+
                 for points in pointsList:
-                    self.edgeImage = cv2.circle(self.edgeImage, (int(points[0]), int(points[1])), 1,  self.color[colorCount], -1)
+                    self.edge_image = cv2.circle(self.edge_image, (int(points[0]), int(points[1])), 1,  self.color[colorCount], -1)
                 for points in pointsContours:
-                    self.contoursImage = cv2.circle(self.contoursImage, (points[0], points[1]), 1, self.color[colorCount], -1)
+                    self.contours_image = cv2.circle(self.contours_image, (points[0], points[1]), 1, self.color[colorCount], -1)
 
-                self.edgePointsList.append([pointsList, colorCount])
-
+                self.edge_points_list.append([pointsList, colorCount])
+            
             colorCount += 1
             lengthList.append(length)
 
         for index, value in enumerate(lengthList):
             if index == 2 or index == 5: 
-                self.finalLengthList.append(value/2)
-                self.finalLengthList.append(value/2)
+                self.final_length_list.append(value/(35*2))
+                self.final_length_list.append(value/(35*2))
+                # self.final_length_list.append(value/35)
             else:
-                self.finalLengthList.append(value)
+                self.final_length_list.append(value/35)
+
+    def plotting(self, outputFolder):
+        cv2.imwrite(os.path.join(outputFolder, "contour points on each edge.png"), self.contours_image)
+        cv2.imwrite(os.path.join(outputFolder, "all points on each edge.png"), self.edge_image)
+        
 
         
 

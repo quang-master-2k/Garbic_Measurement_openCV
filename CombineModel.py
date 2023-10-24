@@ -1,21 +1,22 @@
 import cv2
+import os
 from sympy import symbols, Eq, solve
 import numpy as np
 from numpy import ones,vstack
 from numpy.linalg import lstsq
 
 class CombineModel:
-    def __init__(self, yolo_corner, opencv_corner, thresholdImage, mask):
+    def __init__(self, yolo_corner, opencv_corner, threshold_image, mask):
         # This is the constructor method
         # Initialize instance variables here
-        self.thresholdImage = thresholdImage
+        self.threshold_image = threshold_image
         self.yolo_corner = yolo_corner
         self.opencv_corner = opencv_corner
-        self.mask = mask
         self.corners_with_mode = None
-        self.combineCorners = None
-        self.imageWithMode = None
-        self.imageOnlyCorners = None
+        self.combine_corners = None
+        self.image_with_mode = None
+        self.image_only_corners = None
+        self.mask = mask
 
     def euclidean_distance(self, point1, point2):
         return np.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
@@ -33,7 +34,7 @@ class CombineModel:
 
         return nearest_index
     
-    def checkCircleindex(self, firstNum, nextNum, length):
+    def check_circle_index(self, firstNum, nextNum, length):
         # Checking whether the indices of elements in an array form a consecutive sequence in a circular manner
         if firstNum == nextNum - 1:
             return True
@@ -43,7 +44,7 @@ class CombineModel:
             else:
                 return False
             
-    def changeTupleElementToList(self, oldList):
+    def change_tuple_element_to_list(self, oldList):
         newList = []
         for i in oldList:
             newList.append(list(i))
@@ -70,7 +71,7 @@ class CombineModel:
         sort_comparison_pair.append([finalCorner[nearest_index][1][0], 3])
 
         # Checking if the index is wrong
-        if self.checkCircleindex(sort_comparison_pair[0][0], sort_comparison_pair[1][0], num_corners):
+        if self.check_circle_index(sort_comparison_pair[0][0], sort_comparison_pair[1][0], num_corners):
             step = np.abs(sort_comparison_pair[0][1] - sort_comparison_pair[0][0])
             for index, value in enumerate(finalCorner):
                 finalCorner[index][1][0] = (finalCorner[index][1][0] + step) % num_corners
@@ -116,21 +117,84 @@ class CombineModel:
             for index, value in enumerate(tempCornerFinal):
                 tempCornerFinal[index] = tempCornerFinal[index][0]
 
-        tempCornerFinal = self.changeTupleElementToList(tempCornerFinal)
+        tempCornerFinal = self.change_tuple_element_to_list(tempCornerFinal)
 
-        self.combineCorners = tempCornerFinal
-        self.imageWithMode = cv2.cvtColor(self.thresholdImage.copy(), cv2.COLOR_GRAY2RGB)
-        self.imageOnlyCorners = cv2.cvtColor(self.thresholdImage.copy(), cv2.COLOR_GRAY2RGB)
+        self.combine_corners = tempCornerFinal
+        self.image_with_mode = cv2.cvtColor(self.threshold_image.copy(), cv2.COLOR_GRAY2RGB)
+        self.image_only_corners = cv2.cvtColor(self.threshold_image.copy(), cv2.COLOR_GRAY2RGB)
 
         for point_indx, point in enumerate(tempCornerFinal):
-                    cv2.circle(self.imageWithMode, tuple([int(point[0]), int(point[1])]), 6, (0, 0, 255), -1)
-                    cv2.circle(self.imageOnlyCorners, tuple([int(point[0]), int(point[1])]), 6, (0, 0, 255), -1)
-                    cv2.putText(self.imageWithMode, str(point_indx), (int(point[0]), int(point[1])),
+                    cv2.circle(self.image_with_mode, tuple([int(point[0]), int(point[1])]), 6, (0, 0, 255), -1)
+                    cv2.circle(self.image_only_corners, tuple([int(point[0]), int(point[1])]), 6, (0, 0, 255), -1)
+                    cv2.putText(self.image_with_mode, str(point_indx), (int(point[0]), int(point[1])),
                                 cv2.FONT_HERSHEY_SIMPLEX, 3, (148, 0, 211), 5)
+                    
+    def process_without_Yolo(self, num_corners, mode):
+        finalCorner = self.opencv_corner
+
+        # Checking if the index is wrong
+        step = 0
+        for index, value in enumerate(finalCorner):
+            finalCorner[index][1][0] = (finalCorner[index][1][0] + step) % num_corners
+
+            if len(finalCorner[index][1]) == 2:
+
+                if finalCorner[index][1][1] == 0:
+                    finalCorner[index][1][1] = 'A'
+                else:
+                    finalCorner[index][1][1] = 'B'
+
+        self.corners_with_mode = finalCorner.copy()
+
+        if mode == 'A':
+            tempCornerFinal = []
+
+            # Can code toi uu hon
+            for index, value in enumerate(finalCorner):
+                if len(finalCorner[index][1]) == 2:
+                    if finalCorner[index][1][1] == 'A':
+                        tempCornerFinal.append([value[0], value[1][0]])
+                else:
+                    tempCornerFinal.append([value[0], value[1][0]])
+
+            tempCornerFinal = sorted(tempCornerFinal, key=lambda x: x[1])
+            for index, value in enumerate(tempCornerFinal):
+                tempCornerFinal[index] = tempCornerFinal[index][0]
+
+        elif mode == 'B':
+            tempCornerFinal = []
+
+            # Can code toi uu hon
+            for index, value in enumerate(finalCorner):
+                if len(finalCorner[index][1]) == 2:
+                    if finalCorner[index][1][1] == 'B':
+                        tempCornerFinal.append([value[0], value[1][0]])
+                else:
+                    tempCornerFinal.append([value[0], value[1][0]])
+
+            tempCornerFinal = sorted(tempCornerFinal, key=lambda x: x[1])
+            for index, value in enumerate(tempCornerFinal):
+                tempCornerFinal[index] = tempCornerFinal[index][0]
+
+        tempCornerFinal = self.change_tuple_element_to_list(tempCornerFinal)
+
+        self.combine_corners = tempCornerFinal
+        self.image_with_mode = cv2.cvtColor(self.threshold_image.copy(), cv2.COLOR_GRAY2RGB)
+        self.image_only_corners = cv2.cvtColor(self.threshold_image.copy(), cv2.COLOR_GRAY2RGB)
+
+        for point_indx, point in enumerate(tempCornerFinal):
+                    cv2.circle(self.image_with_mode, tuple([int(point[0]), int(point[1])]), 6, (0, 0, 255), -1)
+                    cv2.circle(self.image_only_corners, tuple([int(point[0]), int(point[1])]), 6, (0, 0, 255), -1)
+                    cv2.putText(self.image_with_mode, str(point_indx), (int(point[0]), int(point[1])),
+                                cv2.FONT_HERSHEY_SIMPLEX, 3, (148, 0, 211), 5)
+                    
+    def plotting(self, outputFolder):
+        cv2.imwrite(os.path.join(outputFolder, "cutpart with corners.png"), self.image_only_corners)
+        cv2.imwrite(os.path.join(outputFolder, "cutpart with mode.png"), self.image_with_mode)
                     
     def cutting_image_2ndMethod(self):
         original_img = self.mask
-        cv_corners = self.combineCorners
+        cv_corners = self.combine_corners
         for index, value in enumerate(cv_corners):
             if index == 0:
                 a0 = value

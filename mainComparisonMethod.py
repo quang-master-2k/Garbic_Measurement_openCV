@@ -144,7 +144,7 @@ for i in range(len(error_dis_and_point)):
         if i == len(error_dis_and_point):
             print("Status: Ok")
 
-cv2.imwrite("/home/quangsog/Downloads/AppHBI/AppHBI/appQt/ComparisonOut/roi_hardP_124.jpg", roi_hardP)
+cv2.imshow("roi_hardP_124.jpg", roi_hardP)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

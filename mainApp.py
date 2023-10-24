@@ -472,7 +472,7 @@ class Ui_MainWindow(object):
         df["Specs LL"] = df['Specs LL'] - 1/8
         listLength = self.finalLengthList
         df["Dimension"] = [listLength[6], listLength[0], listLength[1], listLength[2], listLength[3], listLength[4], listLength[5], listLength[7]]
-        df["Dimension"] = df["Dimension"] / (35*2.54)
+        df["Dimension"] = df["Dimension"] / 2.54
         df = df.round(3)
 
         headers = list(df.head(0))
@@ -514,8 +514,7 @@ class Ui_MainWindow(object):
                     text_query_dimension_result = [current_date, current_time, text[0], text[1], text[2], text[3], df['Name'][i], df["Dimension"][i], "OK", None, None, None]
                 sql = '''INSERT INTO MeasuredResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Dimension_Name, Dimension_Value, Dimension_Result, Comparison_Edge, Error_Distance, Max_Distance)
                             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
-                print(text_query_dimension_result)
-                print(conn.execute(sql, text_query_dimension_result))
+                conn.execute(sql, text_query_dimension_result)
             conn.commit()
             conn.close()
 
@@ -624,13 +623,14 @@ class Ui_MainWindow(object):
     def hardpattern_points_process(self):
         image_path_hard = 'hardpart1.jpg'
         input_image_hard = cv2.imread(image_path_hard)
+
         Yolo = YoloModel()
         Yolo.process(input_image_hard)
         yolo_corners = Yolo.keypoints_yolo
 
-        TradCV = TraditionalCV(thresholdType = cv2.THRESH_BINARY, numCorners = 6, positionThatHaveTwoCorners=[1,4])
+        TradCV = TraditionalCV(threshold_type = cv2.THRESH_BINARY, num_corners = 6, position_that_have_two_corners=[1,4])
         TradCV.process(input_image_hard)
-        cv_corners, mask = TradCV.finalCorner, TradCV.maskAccurate
+        cv_corners, mask = TradCV.final_corner, TradCV.mask_accurate
 
         ### Thickness reflect tolerance
         text_insert = self.get_specs_info()
@@ -658,9 +658,9 @@ class Ui_MainWindow(object):
         Combine.process(num_corners = 6, mode = 'A')
         roi_hardP, rotation_matrix, transposed_matrix, center_point_hardP = Combine.cutting_image_2ndMethod()
 
-        Edge = CalculateEdgeLength(mask, Combine.combineCorners, TradCV.threshold)
+        Edge = CalculateEdgeLength(mask, Combine.combine_corners, TradCV.threshold)
         Edge.process()
-        edges_hardP = Edge.edgePointsList
+        edges_hardP = Edge.edge_points_list
         edges_hardP_cor_newlist = []
         edge_hardP_cor_newlist = []
         for edge in edges_hardP:
@@ -689,19 +689,19 @@ class Ui_MainWindow(object):
         Yolo.process(input_image_cut)
         yolo_corners = Yolo.keypoints_yolo
 
-        TradCV = TraditionalCV(thresholdType = cv2.THRESH_BINARY, numCorners = 6, positionThatHaveTwoCorners=[1,4])
+        TradCV = TraditionalCV(threshold_type = cv2.THRESH_BINARY, num_corners = 6, position_that_have_two_corners=[1,4])
         TradCV.process(input_image_cut)
-        cv_corners, mask = TradCV.finalCorner, TradCV.maskAccurate
+        cv_corners, mask = TradCV.final_corner, TradCV.mask_accurate
 
         Combine = CombineModel(yolo_corners, cv_corners, TradCV.threshold, mask)
         Combine.process(num_corners = 6, mode = 'A')
-        imgDimension = Combine.imageWithMode
+        imgDimension = Combine.image_with_mode
         roi_cut, rotation_matrix, transposed_matrix, center_point_cut = Combine.cutting_image_2ndMethod()
 
-        Edge = CalculateEdgeLength(mask, Combine.combineCorners, TradCV.threshold)
+        Edge = CalculateEdgeLength(mask, Combine.combine_corners, TradCV.threshold)
         Edge.process()
-        finalLengthList = Edge.finalLengthList
-        edges = Edge.edgePointsList
+        finalLengthList = Edge.final_length_list
+        edges = Edge.edge_points_list
 
         cnts_cor_newlist = []
         for edge in edges:
