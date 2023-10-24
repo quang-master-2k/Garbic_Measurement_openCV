@@ -5,6 +5,8 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pyodbc
 
+
+### Class to create table
 class PandasModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         QtCore.QAbstractTableModel.__init__(self)
@@ -29,6 +31,7 @@ class PandasModel(QtCore.QAbstractTableModel):
 
 
 class Ui_MainWindow(object):
+    ### User Interface
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setEnabled(True)
@@ -128,6 +131,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+    ### Rename label and button
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -145,16 +149,19 @@ class Ui_MainWindow(object):
         self.pushButton_4.setText(_translate("MainWindow", "Browse"))
         self.pushButton_5.setText(_translate("MainWindow", "Capture"))
 
+    ### Open file dialog to choose file
     def open_file_dialog(self):
         file_dialog = QtWidgets.QFileDialog()
         file_path = file_dialog.getOpenFileName(None, "Select File")[0]
         self.textEdit_4.setText(file_path)
 
+    ## Open file dialog to choose file
     def open_file_dialog_hardImg(self):
         file_dialog_hardImg = QtWidgets.QFileDialog()
         file_path_hardImg = file_dialog_hardImg.getOpenFileName(None, "Select File")[0]
         self.textEdit_6.setText(file_path_hardImg)
-
+    
+    ### Add database and databaseshow
     def add_database(self):
         file_path = self.textEdit_4.toPlainText()
         text_insert = self.get_specs_info()
@@ -207,6 +214,7 @@ class Ui_MainWindow(object):
 
         self.show_database()
 
+    ### Get input information
     def get_specs_info(self):
         textEdits = [
             self.textEdit,
@@ -220,7 +228,8 @@ class Ui_MainWindow(object):
             texts.append(text)
 
         return texts
-
+    
+    ### Show Database
     def show_database(self):
         conn = sqlite3.connect('databaseTest.db')  # Replace 'database.db' with your desired database name
         cursor = conn.cursor()

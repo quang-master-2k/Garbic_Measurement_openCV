@@ -6,13 +6,15 @@ class secondMethod:
         self.image = image
         self.cnt = cnt
         self.thickness = thickness
-
+    
+    ### Contours visualization function
     def drawTorContours(self):
         mask_tor = np.zeros_like(self.image)
         approx = cv2.approxPolyDP(self.cnt, 0.000001*cv2.arcLength(self.cnt, True), True)
         cv2.drawContours(mask_tor, [approx], 0, (255, 255, 255), self.thickness)
         return mask_tor
-
+    
+    ### Get all coordinates of tolarance contours
     def getTorleranceArea(self, mask_tor):
         #Convert to HSV
         mask_tor_HSV = cv2.cvtColor(mask_tor, cv2.COLOR_BGR2HSV)

@@ -8,7 +8,7 @@ CREATE TABLE FinalResult (
     Number_checking INT,
     Accepted INT,
     Not_Accepted INT,
-    FinalResult BIT
+    FinalResult VARCHAR(255)
 )
 
 Insert into FinalResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Number_checking, Accepted, Not_Accepted, FinalResult)

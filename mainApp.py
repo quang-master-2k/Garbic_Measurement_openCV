@@ -22,7 +22,11 @@ from CalculateEdge import CalculateEdgeLength
 from secondMethod import secondMethod
 from sqlalchemy import create_engine
 import pyodbc
+import math
+from fractions import Fraction
+import datetime
 
+### Class create table
 class PandasModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         QtCore.QAbstractTableModel.__init__(self)
@@ -46,6 +50,7 @@ class PandasModel(QtCore.QAbstractTableModel):
         return None
 
 class Ui_MainWindow(object):
+    ### User interface
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1409, 927)
@@ -252,6 +257,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+    ### Rename labels, buttons, menuBar
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -284,10 +290,12 @@ class Ui_MainWindow(object):
         self.actionSetting.setText(_translate("MainWindow", "Setting"))
 
     ### Camera function
+    # This is webcam computer camera. If you need to connect to Jetson, you have to modify it
     def start_webcam(self):
         self.cap = cv2.VideoCapture(0)
-        self.timer.start(0)  # Update frame every 30 milliMeasurements
+        self.timer.start(30)  # Update frame every 30 milliMeasurements
 
+    # Show camera on application
     def update_frame(self):
         ret, frame = self.cap.read()
         if ret:
@@ -309,20 +317,27 @@ class Ui_MainWindow(object):
         self.timer.timeout.connect(self.update_frame)
         self.start_webcam()
 
+    # Taking photo function
     def take_photo(self):
         if self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
                 return frame
 
+
     ### Visualization function
+    # Results are taken after image processing
+    # imgComparison: Result image of Comparison method
+    # error_dis_and point: Result error distance and max distance
+    # imgDimension: Result image of Dimension method
+    # finalLengthList: Pixel results are measure for each edge
     imgComparison = None
     error_dis_and_point = []
     imgDimension = None
     finalLengthList = []
     def imgprocess(self): 
         self.imgComparison, self.error_dis_and_point, self.imgDimension, self.finalLengthList = self.cam_process()
-
+    # Show image results
     def imgResult_show(self):
         if self.label_5.text() == 'Dimension Method':
             self.scene1 = QtWidgets.QGraphicsScene()
@@ -349,24 +364,25 @@ class Ui_MainWindow(object):
             self.scene1.clear()
             self.scene1.addPixmap(pixmap)
 
-    #Comparison method
+    # Comparison method
+    # dfComparison: detailed result of each measurement
     def Result_comparison_method(self):
         error_list = self.error_dis_and_point
         error_edges = []
         error_dis = []
         max_dis = []
-        dfMea = pd.DataFrame()
+        dfComparison = pd.DataFrame()
         for i in error_list:
             error_edges.append(i[1])
             error_dis.append(i[0][0])
             max_dis.append(i[0][1])
-        dfMea['Edge'] = error_edges
-        dfMea['Error_Dis'] = error_dis
-        dfMea['Max_Dis'] = max_dis
-        dfMea = dfMea.round(3)
+        dfComparison['Edge'] = error_edges
+        dfComparison['Error_Dis'] = error_dis
+        dfComparison['Max_Dis'] = max_dis
+        dfComparison = dfComparison.round(3)
 
-        headers_Mea = list(dfMea.head(0))
-        modelMea = PandasModel(dfMea)
+        headers_Mea = list(dfComparison.head(0))
+        modelMea = PandasModel(dfComparison)
         self.tableView.setModel(modelMea)
 
         self.scene3 = QtWidgets.QGraphicsScene()
@@ -376,27 +392,49 @@ class Ui_MainWindow(object):
         self.scene3.addPixmap(pixmap)
         self.graphicsView_2.setScene(self.scene3)
 
-        return dfMea
+        return dfComparison
 
+    # AQL_count: count Order Number of cut-part is checking
     AQL_count = 1
     OrdNum = []
     ResultAQL = []
     run = 0
     
+    # Display final resulf of comparison method and add result database
     def Final_result_comparison(self):
         dfAQL = pd.DataFrame()
         if self.run == 0:
             self.label_8.setText("Cut-part No: " + str(self.AQL_count))
+            self.OrdNum.append(self.AQL_count)   
 
-            self.OrdNum.append(self.AQL_count)       
+            dfComparison = self.Result_comparison_method()
+            current_date = datetime.date.today()
+            current_time = datetime.datetime.now().time()
             text = self.get_specs_info()
-            dfMea = self.Result_comparison_method()
-            for i in range(len(dfMea['Error_Dis'])):
-                if dfMea["Error_Dis"][i] != None:
+            server = 'quangsog-Inspiron-5570'
+            database = 'HBI_app'
+            username = 'sa'
+            password = '123456Qa'
+            connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+            conn = pyodbc.connect(connection_string)
+            for i in range(len(dfComparison["Edge"])):
+                if pd.isna(dfComparison["Error_Dis"][i]):
+                    text_query_comparison_result = [current_date, current_time, text[0], text[1], text[2], text[3], None, None, None, str(dfComparison["Edge"][i]), None, dfComparison['Max_Dis'][i]]
+                else:
+                    text_query_comparison_result = [current_date, current_time, text[0], text[1], text[2], text[3], None, None, None, str(dfComparison["Edge"][i]), dfComparison["Error_Dis"][i], dfComparison['Max_Dis'][i]]    
+                sql = '''INSERT INTO MeasuredResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Dimension_Name, Dimension_Value, Dimension_Result, Comparison_Edge, Error_Distance, Max_Distance)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
+
+                conn.execute(sql, text_query_comparison_result)
+            conn.commit()
+            conn.close()
+
+            for i in range(len(dfComparison['Error_Dis'])):
+                if dfComparison["Error_Dis"][i] != None:
                     self.ResultAQL.append('NG')
                     break
                 else:
-                    if i == (len(dfMea["Error_Dis"])-1):
+                    if i == (len(dfComparison["Error_Dis"])-1):
                         self.ResultAQL.append('OK')
 
             dfAQL['Cut-part No'] = self.OrdNum
@@ -406,18 +444,14 @@ class Ui_MainWindow(object):
             modelAQL = PandasModel(dfAQL)
             self.tableView_2.setModel(modelAQL)
             self.AQL_count += 1
-
-            if text[1] == "BB":
-                self.label_7.setText("Tolerance: 1/4")
-            else:
-                self.label_7.setText("Tolerance: 1/8")
         else:
             dfAQL['Cut-part No'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
             return dfAQL
         
     
-    #Dimension method
+    # Dimension method
+    # df: detailed results of dimension 
     def Result_dimension_method(self):
         text_insert = self.get_specs_info()
         server = 'quangsog-Inspiron-5570'
@@ -427,11 +461,13 @@ class Ui_MainWindow(object):
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
         engine = create_engine(f'mssql+pyodbc:///?odbc_connect={connection_string}')
 
-
         query = f"SELECT Dimension_Name, Dimension_Value FROM DimensionDatabase WHERE Garment_Style = '{text_insert[0]}' AND Pattern_Code = '{text_insert[1]}' AND Piece_Name = '{text_insert[2]}' AND Size = {text_insert[3]}"
         df = pd.read_sql(query, engine)
         new_column_names = {'Dimension_Name': 'Name', 'Dimension_Value': 'Specs LL'}
         df.rename(columns=new_column_names, inplace=True)
+
+        # Upper limit and lower limit
+        # Need to modify based on result of dimension
         df['Specs UL'] = df["Specs LL"] + 1/8
         df["Specs LL"] = df['Specs LL'] - 1/8
         listLength = self.finalLengthList
@@ -452,27 +488,44 @@ class Ui_MainWindow(object):
         self.graphicsView_2.setScene(self.scene3)
 
         return df
-    
+
+    # Display final resulf of dimension method and add result database
     def Final_result_dimension(self):
         dfAQL = pd.DataFrame()
         if self.run == 0:
             self.label_8.setText("Cut-part No: " + str(self.AQL_count))
 
-            self.OrdNum.append(self.AQL_count)       
+            self.OrdNum.append(self.AQL_count)      
+
             df = self.Result_dimension_method()
-            # for i in range(len(df["Dimension"])):
-            #     if df["Dimension"][i] > df["Specs UL"][i] or df["Dimension"][i] < df["Specs LL"][i]:
-            #         self.ResultAQL.append('NG')
-            #         break
-            #     else:
-            #         if i == len(df["Dimension"]):
-            #             self.ResultAQL.append('OK')
-            if self.AQL_count == 8:
-                self.ResultAQL.append('NG')
-            elif self.AQL_count == 13:
-                self.ResultAQL.append('NG')
-            else:
-                self.ResultAQL.append('OK')
+            current_date = datetime.date.today()
+            current_time = datetime.datetime.now().time()
+            text = self.get_specs_info()
+            server = 'quangsog-Inspiron-5570'
+            database = 'HBI_app'
+            username = 'sa'
+            password = '123456Qa'
+            connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+            conn = pyodbc.connect(connection_string)
+            for i in range(len(df["Dimension"])):
+                if df["Dimension"][i] > df["Specs UL"][i] or df["Dimension"][i] < df["Specs LL"][i]:
+                    text_query_dimension_result = [current_date, current_time, text[0], text[1], text[2], text[3], df['Name'][i], df["Dimension"][i], 'NG', None, None, None]    
+                else:
+                    text_query_dimension_result = [current_date, current_time, text[0], text[1], text[2], text[3], df['Name'][i], df["Dimension"][i], "OK", None, None, None]
+                sql = '''INSERT INTO MeasuredResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Dimension_Name, Dimension_Value, Dimension_Result, Comparison_Edge, Error_Distance, Max_Distance)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
+                print(text_query_dimension_result)
+                print(conn.execute(sql, text_query_dimension_result))
+            conn.commit()
+            conn.close()
+
+            for i in range(len(df["Dimension"])):
+                if df["Dimension"][i] > df["Specs UL"][i] or df["Dimension"][i] < df["Specs LL"][i]:
+                    self.ResultAQL.append('NG')
+                    break
+                else:
+                    if i == (len(df["Dimension"])-1):
+                        self.ResultAQL.append('OK')
 
             dfAQL['Cut-part No'] = self.OrdNum
             dfAQL['Result'] = self.ResultAQL
@@ -486,17 +539,16 @@ class Ui_MainWindow(object):
             dfAQL['Result'] = self.ResultAQL
             return dfAQL
 
-
+    # Display all image and table
     def display_image_measurement(self):
         self.imgprocess()
         self.imgResult_show()
         if self.label_5.text() == "Dimension Method":
-            self.Result_dimension_method()
             self.Final_result_dimension()
         elif self.label_5.text() == "Comparison Method":
-            # self.Result_comparison_method()
             self.Final_result_comparison()
 
+    # For choose both methods in setting, this function change to Dimension when choose Dimension
     def changeDimensionMeasurement(self):
         if self.AQL_count == 1:
             self.label_5.setText("Dimension Method")
@@ -514,7 +566,7 @@ class Ui_MainWindow(object):
             modelAQL = PandasModel(dfAQL)
             self.tableView_2.setModel(modelAQL)
             self.run = 0
-
+    ### For choose both methods in setting, this function change to Comparison when choose Comparison
     def changeComparisonMeasurement(self):
         if self.AQL_count == 1:
             self.label_5.setText("Comparison Method")
@@ -534,6 +586,7 @@ class Ui_MainWindow(object):
             self.run = 0
     
     ### Start function
+    # Setup all variables to start a measurement process
     def set_start(self):
         self.textEdit.setText("")
         self.textEdit_2.setText("")
@@ -543,6 +596,7 @@ class Ui_MainWindow(object):
         self.tableView_2.setModel(None)
         self.scene = QtWidgets.QGraphicsScene()
         self.graphicsView.setScene(self.scene)
+        self.graphicsView_2.setScene(None)
         self.timer = QtCore.QTimer(self.graphicsView)
         self.timer.timeout.connect(self.update_frame)
         self.start_webcam()
@@ -560,9 +614,13 @@ class Ui_MainWindow(object):
         self.label_10.setText("Not Accepted: 0/0 - 0%")
         self.label_11.setText("Final Result: ")
         self.label_12.setText("")
+        self.label_16.setText('Total cut part: ')
+        self.label_17.setText("Required sample q'ty: ")
+        self.label_18.setText("Acceptance level: ")
 
 
     ### Camera processing
+    # Hard-pattern need to modify to get from database
     def hardpattern_points_process(self):
         image_path_hard = 'hardpart1.jpg'
         input_image_hard = cv2.imread(image_path_hard)
@@ -574,7 +632,7 @@ class Ui_MainWindow(object):
         TradCV.process(input_image_hard)
         cv_corners, mask = TradCV.finalCorner, TradCV.maskAccurate
 
-        ### Thickness is 23. Modify it to suitable with torelance
+        ### Thickness reflect tolerance
         text_insert = self.get_specs_info()
         server = 'quangsog-Inspiron-5570'
         database = 'HBI_app'
@@ -587,9 +645,12 @@ class Ui_MainWindow(object):
         tolerance = conn.execute(sql_thickness, text_query_thickness).fetchone()
         conn.commit()
         conn.close()
-        print(tolerance[0])
-
-        MeasurementMethod_hardP = secondMethod(mask, TradCV.cnt, 23)
+        ### Tor (inches) * 2.54 * pixel/cm * 2 = thickness
+        thickness = tolerance[0]* 2.54 * 35 * 2
+        thickness = math.ceil(thickness)
+        label7 = Fraction(float(tolerance[0])).limit_denominator()
+        self.label_7.setText("Tolerance: " + str(label7))
+        MeasurementMethod_hardP = secondMethod(mask, TradCV.cnt, thickness)    
         mask_tor = MeasurementMethod_hardP.drawTorContours()
         white_tor_pixels_cor = MeasurementMethod_hardP.getTorleranceArea(mask_tor)
 
@@ -617,9 +678,11 @@ class Ui_MainWindow(object):
 
         return roi_hardP, white_tor_cor_newlist, center_point_hardP, edges_hardP_cor_newlist
 
+    # When you run to check app you can use Image
+    # When you run with Jetson Nano change to received frame from camera
     def cutpart_points_process(self):
-        ### Modify to frame from camera
-        image_path_cut = 'image_123.jpg'
+        # Modify to take frame from Jetson camera
+        image_path_cut = 'image_2.jpg'
         input_image_cut = cv2.imread(image_path_cut)
 
         Yolo = YoloModel()
@@ -650,9 +713,13 @@ class Ui_MainWindow(object):
             cnts_cor_newlist.append([edge_cor_newlist, edge[1]])
         return cnts_cor_newlist, center_point_cut, imgDimension, finalLengthList
 
+    # Final function process to get result
     def cam_process(self):
+        # Result of hardpattern and cutpart
         roi_hardP, white_tor_cor_newlist, center_point_hardP, edges_hardP = self.hardpattern_points_process()
         cnts_cor_newlist, center_point_cut, imgDimension, finalLengthList = self.cutpart_points_process()
+        
+        # Error edge visualization
         for edge in cnts_cor_newlist:
             for cor in edge[0]:
                 cor[0] = cor[0] + center_point_hardP[0] - center_point_cut[0]
@@ -668,6 +735,7 @@ class Ui_MainWindow(object):
                     error_points.append(j)
             error_edges.append([error_points, i[1]])
 
+        # Error distance
         error_dis_and_point = []
         for i in range(len(error_edges)):
             if len(error_edges[i][0]) != 0:
@@ -684,6 +752,7 @@ class Ui_MainWindow(object):
             else:
                 error_dis_and_point.append([[None], i])
 
+        # Max distance of all edge
         for i in range(len(cnts_cor_newlist)):
             sort_cal_edge = []
             for point in cnts_cor_newlist[i][0]:
@@ -717,6 +786,18 @@ class Ui_MainWindow(object):
         P_reject = round(100 - P_pass, 2)
         self.label_9.setText('OK: ' + str(self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str(P_pass) + '%')
         self.label_10.setText('NG: ' + str(self.AQL_count- 1 - self.countAccepted) + '/' + str(self.AQL_count - 1) + ' - ' + str(P_reject) + '%')
+
+        current_date = datetime.date.today()
+        current_time = datetime.datetime.now().time()
+        text = self.get_specs_info()
+        server = 'quangsog-Inspiron-5570'
+        database = 'HBI_app'
+        username = 'sa'
+        password = '123456Qa'
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        conn = pyodbc.connect(connection_string)
+        
+        #P_Pass is AQL standard - need modify to follow AQL standard
         if (P_pass < 95):
             fontResult = QtGui.QFont()
             fontResult.setFamily("Ubuntu")
@@ -728,6 +809,7 @@ class Ui_MainWindow(object):
             self.label_12.setAlignment(QtCore.Qt.AlignLeft)
             self.label_12.setStyleSheet('color: red')
             self.label_12.setText('Reject')
+            text_final_query = [current_date, current_time, text[0], text[1], text[2], text[3], (self.AQL_count -1), self.countAccepted, (self.AQL_count -1 - self.countAccepted), "Reject"]
         else:
             fontResult = QtGui.QFont()
             fontResult.setFamily("Ubuntu")
@@ -739,6 +821,14 @@ class Ui_MainWindow(object):
             self.label_12.setAlignment(QtCore.Qt.AlignLeft)
             self.label_12.setStyleSheet('color: green')
             self.label_12.setText('Pass')
+            text_final_query = [current_date, current_time, text[0], text[1], text[2], text[3], (self.AQL_count -1), self.countAccepted, (self.AQL_count -1 - self.countAccepted), "Pass"]
+
+        sql = '''INSERT INTO FinalResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Number_checking, Accepted, Not_Accepted, FinalResult)
+            VALUES (?,?,?,?,?,?,?,?,?,?)'''
+        conn.execute(sql, text_final_query)
+        conn.commit()
+        conn.close()
+
         self.label_16.setText('Total cut part: 150')
         self.label_17.setText("Required sample q'ty: 13")
         self.label_18.setText("Acceptance level: 0")
@@ -762,7 +852,8 @@ class Ui_MainWindow(object):
                 self.label_5.setText("Dimension Method & Comparison Method")
                 self.menuMeasurement.setEnabled(True)
                 self.pushButton.setEnabled(True)
-
+    
+    #Get input information
     def get_specs_info(self):
         textEdits = [
             self.textEdit,
@@ -778,6 +869,7 @@ class Ui_MainWindow(object):
    
         return texts
 
+### Options - Setting dialog to choose what method user want to measure
 class SettingDialog(QtWidgets.QDialog):
     def __init__(self):
         super().__init__()
