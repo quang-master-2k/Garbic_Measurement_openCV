@@ -11,5 +11,7 @@ CREATE TABLE FinalResult (
     FinalResult VARCHAR(255)
 )
 
+SELECT * FROM FinalResult
+
 Insert into FinalResult (MeasureDate, MeasureTime ,Garment_Style, Pattern_Code, Piece_Name, Size, Number_checking, Accepted, Not_Accepted, FinalResult)
-VALUES ('Oct 11th, 2023', '10:05:36', 'A', 'B', 'c', 6, 30, 28, 2, 1)
+VALUES ('Oct 11th, 2023', '10:05:36', 'A', 'B', 'c', 6, 30, 28, 2, Reject)

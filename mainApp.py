@@ -468,9 +468,6 @@ class Ui_MainWindow(object):
 
         # Upper limit and lower limit
         # Need to modify based on result of dimension
-        df = pd.DataFrame()
-        df['Name'] = ['L1','L2','L3','L4','L5','L6','L7','L8']
-        df['Specs LL'] = [1,2,3,4,5,6,7,8]
         df['Specs UL'] = df["Specs LL"] + 1/8
         df["Specs LL"] = df['Specs LL'] - 1/8
         listLength = self.finalLengthList
