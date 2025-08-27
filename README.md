@@ -52,14 +52,7 @@ Add other required libraries if needed.
 Refer to Code_Guide.docx for method explanation, usage instructions, and input/output expectations.
 
 ## Usage
-Run different scripts depending on the task:
-   ```bash
-   python CalculateEdge.py --input path/to/image.jpg --output path/to/output.jpg
-   python mainDimensionMethod.py --image path/to/image.jpg --params path/to/params.json
-   python mainComparisonMethod.py --base path/to/image1.jpg --compare path/to/image2.jpg
-   python mainComparisonMethod.py --base path/to/image1.jpg --compare path/to/image2.jpg
-   python mainApp.py
-   python test.py
+Run different scripts depending on the task
 
 ## Contributing
 
