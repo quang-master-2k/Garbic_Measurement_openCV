@@ -11,7 +11,6 @@ This project applies computer vision techniques (OpenCV, NumPy) to detect edges,
 - [Features](#features)  
 - [Installation](#installation)  
 - [Usage](#usage)  
-- [Examples](#examples)  
 - [Contributing](#contributing)  
 - [License](#license)  
 - [Contact](#contact)
@@ -62,3 +61,16 @@ Run different scripts depending on the task:
    python mainApp.py
    python test.py
 
+## Contributing
+
+Contributions are welcome! Whether fixing issues, adding methods, or improving documentation—feel free to open a pull request or issue.
+
+## License
+
+Specify your project's license here (e.g., MIT License, Apache 2.0). If not yet defined, consider adding one for clarity.
+
+## Contact
+
+Repository owner: quang-master-2k
+
+For questions or feedback, feel free to open an issue or reach out via GitHub.
